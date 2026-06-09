@@ -1,0 +1,26 @@
+services:
+  gymdesk:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gymdesk
+    ports:
+      - "3000:3000"
+    volumes:
+      # Persist the SQLite database across restarts
+      - gymdesk-db:/app/db
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - JWT_SECRET=gymdesk-super-secret-change-in-prod
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/auth/me"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  gymdesk-db:
+    driver: local
