@@ -2,14 +2,25 @@
 <html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GymDesk</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>GYMAWY</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1a2332">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GYMAWY">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="/js/jsqr.min.js"></script>
 </head>
 <body>
 
@@ -17,7 +28,7 @@
 <div id="login-page" class="login-wrap" style="display:none">
   <div class="login-box">
     <div class="login-logo">🏋️</div>
-    <h1 class="login-title">GymDesk</h1>
+    <h1 class="login-title">GYMAWY</h1>
     <p class="login-sub" data-i18n="login.subtitle">Sign in to your gym dashboard</p>
     <form id="login-form">
       <div class="form-group">
@@ -41,13 +52,16 @@
   </div>
 </div>
 
+<!-- SIDEBAR BACKDROP (mobile) -->
+<div id="sidebar-backdrop" class="sidebar-backdrop" onclick="App.toggleSidebar()"></div>
+
 <!-- MAIN APP -->
 <div id="app" style="display:none">
   <!-- SIDEBAR -->
   <aside id="sidebar" class="sidebar">
     <div class="sidebar-logo">
       <div class="logo-badge">🏋️</div>
-      <span class="logo-text">GymDesk</span>
+      <span class="logo-text">GYMAWY</span>
       <button class="sidebar-close" onclick="App.toggleSidebar()">✕</button>
     </div>
     <nav class="sidebar-nav" id="sidebar-nav">
@@ -73,7 +87,20 @@
           <button onclick="App.setLang('en')" class="lang-btn" id="app-lang-en">EN</button>
           <button onclick="App.setLang('ar')" class="lang-btn" id="app-lang-ar">AR</button>
         </div>
-        <div class="user-avatar" id="user-avatar">O</div>
+        <button id="btn-share-qr" onclick="App.openShareModal()" title="Mobile Access QR"
+          style="background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.25rem 0.5rem;cursor:pointer;font-size:1rem;display:none;min-height:34px;min-width:34px;align-items:center;justify-content:center">
+          📱
+        </button>
+        <div class="avatar-wrap">
+          <div class="user-avatar" id="user-avatar" onclick="App.toggleUserMenu()">O</div>
+          <div class="user-menu" id="user-menu">
+            <div class="user-menu-header">
+              <strong id="user-menu-name"></strong>
+              <span id="user-menu-role"></span>
+            </div>
+            <button class="user-menu-btn" onclick="App.logout()">🚪 Sign Out</button>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -83,6 +110,11 @@
     </main>
   </div>
 </div>
+
+<!-- BOTTOM NAV (mobile — built dynamically by App.buildBottomNav) -->
+<nav id="bottom-nav" class="bottom-nav" style="display:none">
+  <div class="bottom-nav-inner" id="bottom-nav-inner"></div>
+</nav>
 
 <!-- MODAL -->
 <div id="modal-overlay" class="modal-overlay" style="display:none" onclick="Modal.close()">
@@ -100,6 +132,7 @@
 
 <script src="/js/i18n.js"></script>
 <script src="/js/api.js"></script>
+<script src="/js/stripe-loader.js"></script>
 <script src="/js/app.js"></script>
 <script src="/js/pages/dashboard.js"></script>
 <script src="/js/pages/members.js"></script>
@@ -110,5 +143,14 @@
 <script src="/js/pages/classes.js"></script>
 <script src="/js/pages/users.js"></script>
 <script src="/js/pages/member-portal.js"></script>
+
+<!-- PWA Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+  }
+</script>
 </body>
 </html>

@@ -21,7 +21,10 @@ Pages.payments = {
     container.innerHTML = `
       <div class="page-header">
         <h2>${t('payments.title')}</h2>
-        <button class="btn btn-primary" onclick="Pages.payments.openAddModal()">${t('payments.record_btn')}</button>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="Pages.payments.openAddModal()">${t('payments.record_btn')}</button>
+          <button class="btn btn-secondary" onclick="Pages.payments.openStripeModal()">💳 Charge via Stripe</button>
+        </div>
       </div>
       <div class="card-grid" style="margin-bottom:1.5rem">
         <div class="stat-card gold">
@@ -165,11 +168,110 @@ Pages.payments = {
         await API.createPayment(data);
         Modal.close();
         Toast.success(t('payments.toast.recorded'));
-        this.renderList(document.getElementById('page-content'));
+        App.navigate('payments');
       } catch (err) {
         document.getElementById('new-pay-err').textContent = err.message;
         document.getElementById('new-pay-err').style.display = 'block';
       }
     };
-  }
+  },
+
+  _adminStripe: null,
+  _adminCard:   null,
+
+  async openStripeModal() {
+    const members     = await API.getMembers().catch(() => []);
+    const activePlans = this.plans.filter(p => p.is_active);
+
+    Modal.open('💳 Charge via Stripe', `
+      <div class="form-group">
+        <label>Member</label>
+        <select id="str-admin-member">
+          <option value="">— Select member —</option>
+          ${members.map(m => `<option value="${m.id}">${escHtml(m.name)} (${m.member_code})</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Plan</label>
+        <select id="str-admin-plan">
+          <option value="">— Select plan —</option>
+          ${activePlans.map(p => `<option value="${p.id}">${escHtml(p.name)} — $${parseFloat(p.price).toFixed(2)} / ${p.duration_days}d</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group" style="margin-top:1rem">
+        <label>Card Details</label>
+        <div id="str-admin-card-el" style="border:1px solid var(--border);border-radius:8px;padding:0.75rem;background:var(--bg);min-height:44px"></div>
+        <div id="str-admin-card-err" style="color:#dc2626;font-size:0.8rem;margin-top:0.4rem"></div>
+      </div>
+      <button id="str-admin-pay-btn" onclick="Pages.payments._submitAdminPayment()"
+        style="margin-top:0.5rem;width:100%;padding:0.75rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:0.9rem;cursor:pointer">
+        Charge Now
+      </button>
+      <div id="str-admin-result" style="margin-top:0.75rem"></div>
+    `, async () => {
+      // Mount card element once when modal opens
+      this._adminCard = null;
+      try {
+        const { stripe } = await StripeLoader.load();
+        this._adminStripe = stripe;
+        const elements = stripe.elements();
+        this._adminCard = elements.create('card', {
+          style: {
+            base: { fontSize: '15px', color: '#1a2332', fontFamily: 'Inter, sans-serif', '::placeholder': { color: '#94a3b8' } },
+            invalid: { color: '#dc2626' },
+          },
+        });
+        this._adminCard.mount('#str-admin-card-el');
+        this._adminCard.on('change', e => {
+          const el = document.getElementById('str-admin-card-err');
+          if (el) el.textContent = e.error ? e.error.message : '';
+        });
+      } catch (e) {
+        const el = document.getElementById('str-admin-card-el');
+        if (el) el.innerHTML = `<div class="alert alert-error">${escHtml(e.message)}</div>`;
+      }
+    });
+  },
+
+  async _submitAdminPayment() {
+    const memberId = parseInt(document.getElementById('str-admin-member')?.value);
+    const planId   = parseInt(document.getElementById('str-admin-plan')?.value);
+    const result   = document.getElementById('str-admin-result');
+    const btn      = document.getElementById('str-admin-pay-btn');
+
+    if (!memberId || !planId) {
+      if (result) result.innerHTML = `<div class="alert alert-warning">Please select both a member and a plan.</div>`;
+      return;
+    }
+    if (!this._adminStripe || !this._adminCard) {
+      if (result) result.innerHTML = `<div class="alert alert-error">Card input not ready. Please close and reopen.</div>`;
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Processing…';
+    result.innerHTML = '';
+
+    try {
+      const { clientSecret, paymentIntentId } = await API.post('/stripe/create-payment-intent', {
+        plan_id: planId, member_id: memberId,
+      });
+
+      const { error, paymentIntent } = await this._adminStripe.confirmCardPayment(clientSecret, {
+        payment_method: { card: this._adminCard },
+      });
+
+      if (error) {
+        result.innerHTML = `<div class="alert alert-error">${escHtml(error.message)}</div>`;
+        btn.disabled = false; btn.textContent = 'Charge Now';
+        return;
+      }
+
+      await API.post('/stripe/record-payment', { paymentIntentId: paymentIntent.id });
+      result.innerHTML = `<div class="alert alert-success">✅ Payment successful! Subscription renewed.</div>`;
+      setTimeout(() => { Modal.close(); App.navigate('payments'); }, 2000);
+    } catch (err) {
+      result.innerHTML = `<div class="alert alert-error">${escHtml(err.message)}</div>`;
+      btn.disabled = false; btn.textContent = 'Charge Now';
+    }
+  },
 };

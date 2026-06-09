@@ -6,7 +6,7 @@ const API = {
   clearToken() { localStorage.removeItem('gd_token'); localStorage.removeItem('gd_user'); },
 
   async request(method, path, body) {
-    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    const opts = { method, cache: 'no-store', headers: { 'Content-Type': 'application/json' } };
     const token = this.getToken();
     if (token) opts.headers['Authorization'] = `Bearer ${token}`;
     if (body) opts.body = JSON.stringify(body);

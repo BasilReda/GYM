@@ -39,6 +39,7 @@ Pages.memberPortal = {
     }).join('');
 
     const daysLeftLabel = daysLeft !== null ? (daysLeft < 0 ? t('member.status.expired') : daysLeft + 'd') : '—';
+    const canRenew = !p.status || p.status !== 'suspended';
 
     container.innerHTML = `
       <!-- GREETING -->
@@ -97,6 +98,15 @@ Pages.memberPortal = {
         <div style="margin-top:1rem;padding:0.65rem 1rem;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;font-size:0.82rem;color:rgba(255,255,255,0.9)">
           ❌ ${t('portal.expired_warn')}
         </div>` : ''}
+
+        ${canRenew ? `
+        <div style="margin-top:1.25rem">
+          <button class="btn btn-sm"
+            onclick="Pages.memberPortal.openRenewModal()"
+            style="background:#fff;color:var(--accent);font-weight:600;border:none;padding:0.55rem 1.2rem;border-radius:8px;cursor:pointer;font-size:0.85rem">
+            🔄 ${t('paypal.renew_title')}
+          </button>
+        </div>` : ''}
       </div>
 
       <!-- STATS ROW -->
@@ -151,5 +161,118 @@ Pages.memberPortal = {
         }
       </div>
     `;
-  }
+  },
+
+  // ─── Stripe Renewal Flow ──────────────────────────────
+  _selectedPlanId: null,
+  _stripeObj: null,
+  _cardElement: null,
+
+  async openRenewModal() {
+    try {
+      const plans  = await API.getPlans();
+      const active = plans.filter(p => p.is_active);
+      if (!active.length) { Toast.error('No active plans available.'); return; }
+
+      Modal.open('💳 Renew Subscription', `
+        <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:1rem">1. Choose a plan:</p>
+        <div style="display:grid;gap:0.6rem;margin-bottom:1.25rem">
+          ${active.map(p => `
+            <div class="stripe-plan-card" data-plan-id="${p.id}" onclick="Pages.memberPortal._selectPlan(${p.id})"
+              style="border:2px solid var(--border);border-radius:12px;padding:0.9rem 1rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:border-color 0.15s,background 0.15s">
+              <div>
+                <div style="font-weight:600;color:var(--text)">${escHtml(p.name)}</div>
+                <div style="font-size:0.8rem;color:var(--text-muted)">${p.duration_days} days</div>
+              </div>
+              <div style="font-size:1.2rem;font-weight:700;color:var(--accent)">$${parseFloat(p.price).toFixed(2)}</div>
+            </div>
+          `).join('')}
+        </div>
+        <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:0.5rem">2. Enter card details:</p>
+        <div id="stripe-card-element" style="border:1px solid var(--border);border-radius:8px;padding:0.75rem;background:var(--bg);min-height:44px"></div>
+        <div id="stripe-card-errors" style="color:#dc2626;font-size:0.8rem;margin-top:0.4rem"></div>
+        <button id="stripe-pay-btn" onclick="Pages.memberPortal._submitPayment()"
+          style="margin-top:1rem;width:100%;padding:0.75rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:0.9rem;cursor:pointer">
+          Pay Now
+        </button>
+        <div id="stripe-result" style="margin-top:0.75rem"></div>
+      `, async () => {
+        // Mount card element once after modal DOM is ready
+        this._selectedPlanId = null;
+        this._cardElement = null;
+        try {
+          const { stripe } = await StripeLoader.load();
+          this._stripeObj = stripe;
+          const elements = stripe.elements();
+          this._cardElement = elements.create('card', {
+            style: {
+              base: { fontSize: '15px', color: '#1a2332', fontFamily: 'Inter, sans-serif', '::placeholder': { color: '#94a3b8' } },
+              invalid: { color: '#dc2626' },
+            },
+          });
+          this._cardElement.mount('#stripe-card-element');
+          this._cardElement.on('change', e => {
+            const el = document.getElementById('stripe-card-errors');
+            if (el) el.textContent = e.error ? e.error.message : '';
+          });
+        } catch (e) {
+          const el = document.getElementById('stripe-card-element');
+          if (el) el.innerHTML = `<div class="alert alert-error">${escHtml(e.message)}</div>`;
+        }
+      });
+    } catch (err) {
+      Toast.error(err.message);
+    }
+  },
+
+  _selectPlan(planId) {
+    this._selectedPlanId = planId;
+    document.querySelectorAll('.stripe-plan-card').forEach(el => {
+      const sel = parseInt(el.dataset.planId) === planId;
+      el.style.borderColor = sel ? 'var(--accent)' : 'var(--border)';
+      el.style.background  = sel ? 'rgba(26,35,50,0.05)' : '';
+    });
+  },
+
+  async _submitPayment() {
+    const result = document.getElementById('stripe-result');
+    const btn    = document.getElementById('stripe-pay-btn');
+    if (!this._selectedPlanId) {
+      if (result) result.innerHTML = `<div class="alert alert-warning">Please select a plan first.</div>`;
+      return;
+    }
+    if (!this._stripeObj || !this._cardElement) {
+      if (result) result.innerHTML = `<div class="alert alert-error">Card input not ready. Please refresh.</div>`;
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Processing…';
+    result.innerHTML = '';
+
+    try {
+      const { clientSecret, paymentIntentId } = await API.post('/stripe/create-payment-intent', {
+        plan_id: this._selectedPlanId,
+      });
+
+      const { error, paymentIntent } = await this._stripeObj.confirmCardPayment(clientSecret, {
+        payment_method: { card: this._cardElement },
+      });
+
+      if (error) {
+        result.innerHTML = `<div class="alert alert-error">${escHtml(error.message)}</div>`;
+        btn.disabled = false; btn.textContent = 'Pay Now';
+        return;
+      }
+
+      await API.post('/stripe/record-payment', { paymentIntentId: paymentIntent.id });
+      result.innerHTML = `<div class="alert alert-success">✅ Payment successful! Subscription renewed.</div>`;
+      setTimeout(() => {
+        Modal.close();
+        App.navigate('my-membership');
+      }, 2000);
+    } catch (err) {
+      result.innerHTML = `<div class="alert alert-error">${escHtml(err.message)}</div>`;
+      btn.disabled = false; btn.textContent = 'Pay Now';
+    }
+  },
 };

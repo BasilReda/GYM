@@ -9,6 +9,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Bypass ngrok browser warning for all responses (needed for PWA detection)
+app.use((req, res, next) => {
+  res.setHeader('ngrok-skip-browser-warning', 'true');
+  next();
+});
+
 // API Routes
 app.use('/api/auth',          require('./routes/auth'));
 app.use('/api/members',       require('./routes/members'));
@@ -19,6 +25,8 @@ app.use('/api/trainers',      require('./routes/trainers'));
 app.use('/api/classes',       require('./routes/classes'));
 app.use('/api/dashboard',     require('./routes/dashboard'));
 app.use('/api/portal',        require('./routes/member-portal'));
+app.use('/api/paypal',        require('./routes/paypal'));
+app.use('/api/stripe',        require('./routes/stripe'));
 
 // Serve static frontend
 app.use(express.static(path.join(__dirname, 'public')));

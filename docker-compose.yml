@@ -13,6 +13,16 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - JWT_SECRET=gymdesk-super-secret-change-in-prod
+      # ── PayPal ────────────────────────────────────────────
+      # Get these from https://developer.paypal.com → My Apps & Credentials
+      # Use "Sandbox" credentials for testing, "Live" for production
+      # ── Stripe ────────────────────────────────────────────
+      # Get these from https://dashboard.stripe.com → Developers → API keys
+      # Use test keys (pk_test_ / sk_test_) for testing
+      - STRIPE_PUBLISHABLE_KEY=pk_test_51TgXeS0iSyLfKmNkQboID46ZJAaTvWu5UdK2P6cJqETnQ9Vpogv5RgdhpiTeZNsNRAtpJ44Oos07jgtO4ElacHtD00YaZ8oniy
+      - STRIPE_SECRET_KEY=sk_test_51TgXeS0iSyLfKmNk9om32eAjUYh47KBnnVCM7fdxrLG6W3nJqvVihBlqttkkNZtIQg9Pw0yfebFA9yiuF0jXZ7ee00IEhAp34b
+      - STRIPE_CURRENCY=usd
+      - APP_URL=http://localhost:3000
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/auth/me"]
