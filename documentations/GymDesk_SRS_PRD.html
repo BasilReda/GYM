@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GymDesk — SRS & PRD v1.0</title>
+<style>
+  :root {
+    --primary: #0f172a;
+    --secondary: #1e293b;
+    --accent: #14b8a6;
+    --accent2: #8b5cf6;
+    --gold: #f59e0b;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --card-bg: #1e293b;
+    --border: #334155;
+    --success: #22c55e;
+    --warning: #eab308;
+    --danger: #ef4444;
+    --info: #3b82f6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--primary);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* ── COVER PAGE ── */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(20,184,166,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(139,92,246,0.08) 0%, transparent 50%);
+    animation: pulse 8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 1; }
+  }
+  .cover-content { position: relative; z-index: 1; max-width: 900px; }
+  .cover-badge {
+    display: inline-block;
+    background: rgba(20,184,166,0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 0.4rem 1.5rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+  }
+  .cover h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    line-height: 1.1;
+  }
+  .cover .subtitle {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-bottom: 2rem;
+  }
+  .cover .tagline {
+    font-size: 1.1rem;
+    color: var(--gold);
+    font-style: italic;
+    margin-bottom: 2.5rem;
+    opacity: 0.9;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+  .cover-meta span { padding: 0.3rem 1rem; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid var(--border); }
+  .cover-arch {
+    margin-top: 3rem;
+    max-width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  /* ── NAVIGATION ── */
+  .nav-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15,23,42,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .nav-bar .logo { font-weight: 700; color: var(--accent); font-size: 1.1rem; white-space: nowrap; }
+  .nav-bar nav { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+  .nav-bar nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.78rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .nav-bar nav a:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+
+  /* ── MAIN CONTENT ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+
+  /* ── TABLE OF CONTENTS ── */
+  .toc {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+  }
+  .toc h2 { color: var(--accent); margin-bottom: 1rem; font-size: 1.3rem; }
+  .toc ol { columns: 2; column-gap: 2rem; list-style-position: inside; }
+  .toc ol li { margin-bottom: 0.4rem; break-inside: avoid; }
+  .toc ol li a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .toc ol li a:hover { color: var(--accent); }
+
+  /* ── SECTION STYLES ── */
+  section { margin-bottom: 3rem; }
+  .section-header {
+    border-left: 4px solid var(--accent);
+    padding-left: 1rem;
+    margin-bottom: 1.5rem;
+    padding-top: 1rem;
+  }
+  .section-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .section-header .section-desc {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-top: 0.3rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 1.5rem 0 0.8rem;
+  }
+  h4 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--gold);
+    margin: 1.2rem 0 0.6rem;
+  }
+  p { margin-bottom: 0.8rem; color: var(--text-muted); }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .card h4 { margin-top: 0; }
+
+  /* ── TABLES ── */
+  .table-wrap {
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  thead { background: rgba(20,184,166,0.1); }
+  th {
+    padding: 0.8rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+    white-space: nowrap;
+  }
+  td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ── PRIORITY BADGES ── */
+  .p0, .badge-p0 { display: inline-block; background: rgba(239,68,68,0.15); color: var(--danger); padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .p1, .badge-p1 { display: inline-block; background: rgba(234,179,8,0.15); color: var(--warning); padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .p2, .badge-p2 { display: inline-block; background: rgba(59,130,246,0.15); color: var(--info); padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .badge-green { background: rgba(34,197,94,0.15); color: var(--success); padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .badge-gold { background: rgba(245,158,11,0.15); color: var(--gold); padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+
+  /* ── ROLE MATRIX ── */
+  .role-matrix { font-size: 0.82rem; }
+  .role-matrix td, .role-matrix th { padding: 0.5rem 0.7rem; }
+  .role-matrix .yes { color: var(--success); }
+  .role-matrix .no { color: var(--danger); opacity: 0.5; }
+
+  /* ── BLOCKQUOTE ── */
+  blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    background: rgba(20,184,166,0.05);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  /* ── CODE ── */
+  code {
+    background: rgba(255,255,255,0.06);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85em;
+    color: var(--gold);
+  }
+  pre {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem;
+    overflow-x: auto;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── PERSONA CARD ── */
+  .persona-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+  }
+  .persona-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+  }
+  .persona-card h4 { margin-top: 0; color: var(--accent); }
+  .persona-card p { font-size: 0.9rem; margin-bottom: 0.4rem; }
+  .persona-card .label { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .persona-card .flow { color: var(--gold); font-size: 0.85rem; margin-top: 0.5rem; }
+
+  /* ── USER STORIES ── */
+  .story { padding: 0.8rem 1rem; border-left: 3px solid var(--accent2); margin-bottom: 0.5rem; background: rgba(139,92,246,0.05); border-radius: 0 6px 6px 0; font-size: 0.9rem; }
+  .story code { font-weight: 600; color: var(--accent2); }
+
+  /* ── FOOTER ── */
+  .doc-footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 3rem;
+  }
+  .doc-footer strong { color: var(--accent); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .toc ol { columns: 1; }
+    .nav-bar nav a { font-size: 0.7rem; padding: 0.2rem 0.5rem; }
+    .cover-meta { flex-direction: column; align-items: center; gap: 0.8rem; }
+    .persona-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    .nav-bar { display: none; }
+    .cover { min-height: auto; padding: 1rem; }
+    body { background: white; color: black; }
+    .card, .toc, .table-wrap { border-color: #ccc; background: #f9f9f9; }
+    th { color: #333; }
+    td { color: #555; }
+    a { color: #1a73e8; }
+    .section-header h2 { color: #111; }
+    h3 { color: #0d9488; }
+    .cover h1 { -webkit-text-fill-color: #0d9488; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ COVER ═══════════ -->
+<div class="cover">
+  <div class="cover-content">
+    <div class="cover-badge">📋 Document v1.0 &mdash; June 9, 2026</div>
+    <h1>🏋️ GymDesk</h1>
+    <div class="subtitle">Small Gym Management System</div>
+    <div class="tagline">&ldquo;Empower every small gym owner to run their facility<br>like a big-box chain — without the complexity or cost.&rdquo;</div>
+    <div class="cover-meta">
+      <span>📄 SRS &amp; PRD</span>
+      <span>👥 6 User Roles</span>
+      <span>⚙️ 60+ Requirements</span>
+      <span>🧪 40+ Edge Cases</span>
+      <span>🌐 EN / AR</span>
+    </div>
+    <!-- <img src="GymDesk_Architecture_Cover.png" alt="GymDesk Architecture" class="cover-arch" style="max-width:100%; margin-top:2.5rem; border-radius:12px; border:1px solid #334155;"> -->
+  </div>
+</div>
+
+<!-- ═══════════ NAV BAR ═══════════ -->
+<div class="nav-bar">
+  <div class="logo">🏋️ GymDesk</div>
+  <nav>
+    <a href="#intro">Intro</a>
+    <a href="#roles">Roles</a>
+    <a href="#functional">Requirements</a>
+    <a href="#nonfunctional">NFRs</a>
+    <a href="#edge-cases">Edge Cases</a>
+    <a href="#stories">User Stories</a>
+    <a href="#constraints">Constraints</a>
+    <a href="#kpis">KPIs</a>
+    <a href="#glossary">Glossary</a>
+  </nav>
+</div>
+
+<div class="container">
+
+<!-- ═══════════ TOC ═══════════ -->
+<div class="toc">
+  <h2>📑 Table of Contents</h2>
+  <ol>
+    <li><a href="#intro">Introduction</a></li>
+    <li><a href="#overview">Product Overview</a></li>
+    <li><a href="#roles">User Roles &amp; Personas</a></li>
+    <li><a href="#functional">Functional Requirements</a></li>
+    <li><a href="#nonfunctional">Non-Functional Requirements</a></li>
+    <li><a href="#edge-cases">Edge Cases &amp; Exception Handling</a></li>
+    <li><a href="#stories">User Stories (Agile Backlog)</a></li>
+    <li><a href="#constraints">Constraints &amp; Assumptions</a></li>
+    <li><a href="#kpis">Success Metrics / KPIs</a></li>
+    <li><a href="#glossary">Appendix: Glossary</a></li>
+  </ol>
+</div>
+
+<!-- ═══════════ 1. INTRODUCTION ═══════════ -->
+<section id="intro">
+  <div class="section-header">
+    <h2>1. Introduction</h2>
+    <div class="section-desc">Purpose, scope, and key definitions for the GymDesk platform.</div>
+  </div>
+
+  <h3>1.1 Purpose</h3>
+  <p>GymDesk is a web-based platform for managing gym memberships, attendance, payments, class schedules, and staff operations — purpose-built for <strong>small to mid-sized fitness facilities</strong> (1–500 members). This document defines the complete functional and non-functional requirements for the MVP (Minimum Viable Product) and subsequent releases.</p>
+
+  <h3>1.2 Scope</h3>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+    <div class="card">
+      <h4 style="color:var(--success)">✅ In Scope (MVP)</h4>
+      <ul style="color:var(--text-muted); font-size:0.9rem; padding-left:1.2rem;">
+        <li>Authentication &amp; RBAC with 6 roles</li>
+        <li>Member CRUD operations</li>
+        <li>Subscription plan management &amp; lifecycle tracking</li>
+        <li>Attendance via Member ID &amp; QR code</li>
+        <li>Payment recording, history &amp; overdue tracking</li>
+        <li>Trainer profiles &amp; fitness class scheduling</li>
+        <li>Dashboard with key operational metrics</li>
+        <li>Responsive web UI (mobile-first)</li>
+        <li>Bilingual support (Arabic / English)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--danger)">❌ Out of Scope (Post-MVP)</h4>
+      <ul style="color:var(--text-muted); font-size:0.9rem; padding-left:1.2rem;">
+        <li>Native mobile apps (iOS/Android)</li>
+        <li>Third-party payment gateways</li>
+        <li>Hardware integrations (turnstiles, biometrics)</li>
+        <li>Marketing automation / email campaigns</li>
+        <li>Online class booking by members</li>
+        <li>Waitlist management</li>
+        <li>Inventory management</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>1.3 Definitions &amp; Acronyms</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+      <tbody>
+        <tr><td>SRS</td><td>Software Requirements Specification</td></tr>
+        <tr><td>PRD</td><td>Product Requirements Document</td></tr>
+        <tr><td>RBAC</td><td>Role-Based Access Control</td></tr>
+        <tr><td>CRUD</td><td>Create, Read, Update, Delete</td></tr>
+        <tr><td>MVP</td><td>Minimum Viable Product</td></tr>
+        <tr><td>QR</td><td>Quick Response (code)</td></tr>
+        <tr><td>Member ID</td><td>Unique alphanumeric identifier assigned to each gym member (e.g., <code>GDM-2026-0001</code>)</td></tr>
+        <tr><td>Subscription Plan</td><td>A pricing model (monthly, quarterly, annual) defining membership terms</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════ 2. PRODUCT OVERVIEW ═══════════ -->
+<section id="overview">
+  <div class="section-header">
+    <h2>2. Product Overview</h2>
+    <div class="section-desc">Vision, target audience, and high-level system architecture.</div>
+  </div>
+
+  <h3>2.1 Product Vision</h3>
+  <blockquote>Empower every small gym owner to run their facility like a big-box chain — without the complexity or cost.</blockquote>
+
+  <h3>2.2 Target Audience</h3>
+  <ul style="color:var(--text-muted); margin-bottom:1.5rem;">
+    <li><strong>Primary:</strong> Independent gym owners with 1–3 locations, 50–500 members</li>
+    <li><strong>Secondary:</strong> Boutique fitness studios, CrossFit boxes, yoga studios, martial arts dojos</li>
+    <li><strong>Tertiary:</strong> Multi-location chains (Phase 2)</li>
+  </ul>
+
+  <h3>2.3 High-Level Architecture</h3>
+  <p>The system follows a three-tier architecture with clear separation of concerns:</p>
+  <ul style="color:var(--text-muted); margin-bottom:1rem;">
+    <li><strong>Client Layer:</strong> Responsive web application accessible via browser on desktop, tablet, and mobile</li>
+    <li><strong>Application Layer:</strong> REST API with modular services (Auth, Member, Subscription, Attendance, Billing, Trainer, Class, Dashboard, Notification)</li>
+    <li><strong>Data Layer:</strong> PostgreSQL (primary DB), Redis (cache/sessions), File Storage (QR codes, member photos)</li>
+  </ul>
+<img src="GymDesk_Architecture_Cover.png" alt="Architecture Diagram" style="max-width:100%; border-radius:10px; border:1px solid var(--border); margin-bottom:1rem;"></section>
+
+<!-- ═══════════ 3. USER ROLES & PERSONAS ═══════════ -->
+<section id="roles">
+  <div class="section-header">
+    <h2>3. User Roles &amp; Personas</h2>
+    <div class="section-desc">Six distinct roles with a detailed access matrix and six realistic personas.</div>
+  </div>
+
+  <h3>3.1 Role Hierarchy &amp; Access Matrix</h3>
+  <div class="table-wrap">
+    <table class="role-matrix">
+      <thead>
+        <tr>
+          <th>Feature / Module</th>
+          <th>👤 Guest</th>
+          <th>💪 Member</th>
+          <th>🛎️ Reception</th>
+          <th>🏋️ Trainer</th>
+          <th>📊 Manager</th>
+          <th>👑 Owner</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>View public info &amp; pricing</td><td class="yes">✅</td><td class="yes">✅</td><td class="yes">✅</td><td class="yes">✅</td><td class="yes">✅</td><td class="yes">✅</td></tr>
+        <tr><td>Register / Contact gym</td><td class="yes">✅</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td></tr>
+        <tr><td>View own subscription status</td><td class="no">❌</td><td class="yes">✅</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td></tr>
+        <tr><td>Check-in (self-service)</td><td class="no">❌</td><td class="yes">✅</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td></tr>
+        <tr><td>View own attendance history</td><td class="no">❌</td><td class="yes">✅</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td></tr>
+        <tr><td>Receive expiry/payment reminders</td><td class="no">❌</td><td class="yes">✅</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td></tr>
+        <tr><td>Add / Edit / Delete members</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td></tr>
+        <tr><td>Record membership payments</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td><td class="no">❌</td><td class="yes">✅</td><td class="yes">✅</td></tr>
+        <tr><td>Renew memberships</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td><td class="no">❌</td><td class="yes">✅</td><td class="yes">✅</td></tr>
+        <tr><td>Check-in members (manual/QR)</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td><td class="no">❌</td><td class="yes">✅</td><td class="yes">✅</td></tr>
+        <tr><td>View overdue payments &amp; flag</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td><td class="no">❌</td><td class="yes">✅</td><td class="yes">✅</td></tr>
+        <tr><td>View assigned classes &amp; schedule</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td><td class="yes">✅</td><td class="yes">✅</td></tr>
+        <tr><td>View class participant list</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td><td class="yes">✅</td><td class="yes">✅</td></tr>
+        <tr><td>Mark attendance per session</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td><td class="yes">✅</td><td class="yes">✅</td></tr>
+        <tr><td>Monitor daily attendance &amp; active members</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td><td class="yes">✅</td></tr>
+        <tr><td>Manage trainer schedules &amp; class assignments</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td><td class="yes">✅</td></tr>
+        <tr><td>View revenue &amp; subscription reports</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td><td class="yes">✅</td></tr>
+        <tr><td>Manage staff accounts &amp; roles</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td><td class="yes">✅</td></tr>
+        <tr><td>Configure subscription plans &amp; pricing</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td></tr>
+        <tr><td>View platform-wide analytics</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td></tr>
+        <tr><td>Manage all user accounts &amp; roles</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="yes">✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>3.2 Personas</h3>
+  <div class="persona-grid">
+    <div class="persona-card">
+      <h4>👤 Guest (Ahmed)</h4>
+      <p><span class="label">Demographics:</span> 28, looking for a gym nearby</p>
+      <p><span class="label">Needs:</span> Browse class schedules, pricing, location hours</p>
+      <p><span class="label">Pain Points:</span> Doesn't want to call; wants self-serve info</p>
+      <p class="flow">🔄 Landing page → View pricing → Register → Become Member</p>
+    </div>
+    <div class="persona-card">
+      <h4>💪 Member (Sara)</h4>
+      <p><span class="label">Demographics:</span> 34, working mother, attends 3×/week</p>
+      <p><span class="label">Needs:</span> Quick check-in, view subscription expiry, receive reminders</p>
+      <p><span class="label">Pain Points:</span> Forgets to renew, long check-in queues</p>
+      <p class="flow">🔄 Arrive → Scan QR / Enter ID → Workout → Leave</p>
+    </div>
+    <div class="persona-card">
+      <h4>🛎️ Reception Staff (Khaled)</h4>
+      <p><span class="label">Demographics:</span> 22, part-time student, handles front desk</p>
+      <p><span class="label">Needs:</span> Fast check-ins, member lookup, payment collection</p>
+      <p><span class="label">Pain Points:</span> Manual paper records, member name misspellings</p>
+      <p class="flow">🔄 Greet member → Search name → Check in / Record payment</p>
+    </div>
+    <div class="persona-card">
+      <h4>🏋️ Trainer (Layla)</h4>
+      <p><span class="label">Demographics:</span> 29, certified fitness instructor</p>
+      <p><span class="label">Needs:</span> View her class schedule, see who showed up, mark attendance</p>
+      <p><span class="label">Pain Points:</span> Tracking no-shows, rescheduling conflicts</p>
+      <p class="flow">🔄 Check schedule → Take attendance → Update class notes</p>
+    </div>
+    <div class="persona-card">
+      <h4>📊 Gym Manager (Omar)</h4>
+      <p><span class="label">Demographics:</span> 40, operations manager at a mid-sized gym</p>
+      <p><span class="label">Needs:</span> Daily attendance stats, revenue reports, staff oversight</p>
+      <p><span class="label">Pain Points:</span> Paper-based reporting, Excel dependency</p>
+      <p class="flow">🔄 Morning → Check yesterday's attendance → Review overdue → Assign trainers</p>
+    </div>
+    <div class="persona-card">
+      <h4>👑 Gym Owner (Hassan)</h4>
+      <p><span class="label">Demographics:</span> 52, owns 2 gyms, non-technical</p>
+      <p><span class="label">Needs:</span> Top-level KPIs, configure plans, hire/fire staff</p>
+      <p><span class="label">Pain Points:</span> Can't compare gym performance, hard to spot declining memberships</p>
+      <p class="flow">🔄 Monthly → Log in → View analytics → Adjust pricing → Review staff</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 4. FUNCTIONAL REQUIREMENTS ═══════════ -->
+<section id="functional">
+  <div class="section-header">
+    <h2>4. Functional Requirements</h2>
+    <div class="section-desc">60+ requirements across 10 feature areas, each tagged with priority (P0=Critical, P1=Important, P2=Future).</div>
+  </div>
+
+  <!-- FR-1 -->
+  <h3>FR-1: Authentication &amp; Authorization <span class="badge-p0">8 reqs</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Requirement</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>FR-1.1</td><td>Email + password registration and login for staff roles (Reception, Trainer, Manager, Owner)</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-1.2</td><td>Members receive credentials (Member ID + temporary password) from staff; self-registration optional</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-1.3</td><td>Enforce RBAC: every API request must include a valid JWT token with role claims</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-1.4</td><td>Password reset via email (forgot password flow)</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>FR-1.5</td><td>Sessions expire after 24 hours of inactivity; refresh tokens supported</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>FR-1.6</td><td>Log all login attempts (successful &amp; failed) for audit</td><td><span class="badge-p2">P2</span></td></tr>
+        <tr><td>FR-1.7</td><td>Owner may deactivate any user account; deactivated accounts cannot authenticate</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-1.8</td><td>Arabic and English login/signup UI labels based on user locale</td><td><span class="badge-p1">P1</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FR-2 -->
+  <h3>FR-2: Member Management <span class="badge-p0">8 reqs</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Requirement</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>FR-2.1</td><td>Create member profile with: name, phone, email (opt), DOB (opt), photo (opt), emergency contact (opt), notes (opt), subscription plan, start date</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-2.2</td><td>Search/fuzzy match members by name, phone, Member ID, or subscription plan</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-2.3</td><td>Update member profile fields (Member ID immutable after creation)</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-2.4</td><td>Deactivate/reactivate member (soft delete); hard delete is Owner-only + logged</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-2.5</td><td>Unique system-generated Member ID (e.g., <code>GDM-2026-0001</code>)</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-2.6</td><td>Generate scannable QR code for each member upon profile creation</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-2.7</td><td>Display membership status (Active, Expiring Soon, Expired, Suspended) on profile card</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-2.8</td><td>Custom tags/labels for members (e.g., "VIP", "Needs Follow-up")</td><td><span class="badge-p2">P2</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FR-3 -->
+  <h3>FR-3: Subscription / Membership Plan Management <span class="badge-p0">9 reqs</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Requirement</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>FR-3.1</td><td>Owner can create, read, update, and deactivate subscription plans</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-3.2</td><td>Each plan: name, duration (30/90/180/365 days), price, description, status</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-3.3</td><td>Default plans: Monthly (30d), Quarterly (90d), Annual (365d)</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-3.4</td><td>Calculate and store member's <code>start_date</code> and <code>end_date</code> on plan assignment</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-3.5</td><td>Auto-flag members expiring within 7 days ("Expiring Soon") and 1 day ("Expiring Tomorrow")</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-3.6</td><td>Renewal extends from current end_date, not renewal date</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-3.7</td><td>Free trial plan type with configurable duration (default: 3 days)</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>FR-3.8</td><td>Grace period (default: 3 days) after expiry; check-in blocked after grace period</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>FR-3.9</td><td>Prevent assigning inactive/deactivated plan to new members</td><td><span class="badge-p1">P1</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FR-4 -->
+  <h3>FR-4: Attendance Tracking <span class="badge-p0">8 reqs</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Requirement</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>FR-4.1</td><td>Check-in via Member ID (numeric input) or QR code scan</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-4.2</td><td>Staff-assisted check-in by searching name and tapping "Check In"</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-4.3</td><td>Record: member ID, timestamp, method (QR/Manual/Staff), location</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-4.4</td><td>Prevent duplicate check-ins within 2-hour window</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>FR-4.5</td><td>Reject expired members (beyond grace period): "Membership expired. Please renew."</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-4.6</td><td>Reject deactivated/suspended members: "Account suspended. Contact management."</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-4.7</td><td>View attendance history filtered by date range</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>FR-4.8</td><td>Dashboard shows "Today's Check-ins" count (near-real-time ≤ 30s delay)</td><td><span class="badge-p1">P1</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FR-5 -->
+  <h3>FR-5: Payment Management <span class="badge-p0">8 reqs</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Requirement</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>FR-5.1</td><td>Record payment: amount, method (Cash/Card/Bank Transfer), date, notes</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-5.2</td><td>Calculate new subscription end date on payment based on plan duration</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-5.3</td><td>Immutable payment history log (no editing/deleting; corrections via offsetting entry)</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-5.4</td><td>Auto-flag members with payments due &gt; 30 days overdue ("Red" indicator)</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-5.5</td><td>View all payments for a member in chronological order</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-5.6</td><td>Generate invoice/receipt PDF for any completed payment</td><td><span class="badge-p2">P2</span></td></tr>
+        <tr><td>FR-5.7</td><td>Staff may override price with mandatory reason (e.g., "Loyalty Discount")</td><td><span class="badge-p2">P2</span></td></tr>
+        <tr><td>FR-5.8</td><td>Partial payments: track remaining balance</td><td><span class="badge-p2">P2</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FR-6 -->
+  <h3>FR-6: Trainer &amp; Class Management <span class="badge-p0">9 reqs</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Requirement</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>FR-6.1</td><td>Create trainer profiles: name, specialization, phone, email, photo, bio</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-6.2</td><td>Create fitness class types: name, description, capacity, duration, default trainer</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-6.3</td><td>Schedule class sessions on weekly calendar (day, start/end time, trainer, room)</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-6.4</td><td>Trainers see dashboard of their scheduled classes for current week</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-6.5</td><td>Trainers view list of members checked into each class session</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-6.6</td><td>Trainers mark attendance: Present / Absent / Late</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-6.7</td><td>Prevent double-booking a trainer for overlapping time slots</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>FR-6.8</td><td>Notify Manager if a class has &lt; 3 attendees (cancellation threshold)</td><td><span class="badge-p2">P2</span></td></tr>
+        <tr><td>FR-6.9</td><td>Members view weekly class schedule (read-only) on public site</td><td><span class="badge-p1">P1</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FR-7 -->
+  <h3>FR-7: Dashboard &amp; Reporting <span class="badge-p0">7 reqs</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Requirement</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>FR-7.1</td><td>Dashboard cards: Total Active Members, Expired Subs, Today's Check-ins, Monthly Revenue</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-7.2</td><td>Membership Report: new sign-ups vs. expirations per month (bar chart)</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>FR-7.3</td><td>Revenue Report: monthly collections with previous-month comparison</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>FR-7.4</td><td>Attendance Report: average daily attendance per week/month</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>FR-7.5</td><td>Export any report as CSV or PDF</td><td><span class="badge-p2">P2</span></td></tr>
+        <tr><td>FR-7.6</td><td>Dashboard auto-refresh every 60 seconds (configurable)</td><td><span class="badge-p2">P2</span></td></tr>
+        <tr><td>FR-7.7</td><td>"Membership Expiry Timeline" — members expiring in next 7 days sorted by date</td><td><span class="badge-p1">P1</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FR-8 -->
+  <h3>FR-8: Notification Service <span class="badge-p0">6 reqs</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Requirement</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>FR-8.1</td><td>In-app notification to members expiring in 7 days</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-8.2</td><td>In-app notification to members expiring tomorrow</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-8.3</td><td>In-app notification for overdue payments (&gt; 3 days past due)</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>FR-8.4</td><td>Staff notified when high-value member (Owner-configurable) is about to expire</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>FR-8.5</td><td>Configurable notification preferences (in-app; future: SMS, WhatsApp, Email)</td><td><span class="badge-p2">P2</span></td></tr>
+        <tr><td>FR-8.6</td><td>Bilingual notifications (Arabic/English) based on preferred language</td><td><span class="badge-p1">P1</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FR-9 -->
+  <h3>FR-9: Internationalization (i18n) <span class="badge-p0">6 reqs</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Requirement</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>FR-9.1</td><td>UI support for Arabic (ar-EG) and English (en-US)</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-9.2</td><td>Language selection on login screen and in user profile settings</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-9.3</td><td>Arabic layout uses RTL (Right-to-Left) text direction</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-9.4</td><td>Date formats respect locale (Gregorian; optional Hijri for Arabic)</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>FR-9.5</td><td>Currency formatting uses local conventions (e.g., EGP)</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>FR-9.6</td><td>Translation strings managed via localization file (JSON i18n resource bundles)</td><td><span class="badge-p1">P1</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FR-10 -->
+  <h3>FR-10: QR Code Check-In Engine <span class="badge-p0">6 reqs</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Requirement</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>FR-10.1</td><td>Generate unique QR code per member upon profile creation</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-10.2</td><td>QR code encodes Member ID + validation hash to prevent forgery</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-10.3</td><td>QR code printable from member profile page (PDF card format)</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-10.4</td><td>Web-based QR scanner using device camera</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-10.5</td><td>Invalid QR codes (hash validation fail) rejected with error message</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>FR-10.6</td><td>QR code regeneration support; old QR code invalidated immediately</td><td><span class="badge-p1">P1</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════ 5. NON-FUNCTIONAL REQUIREMENTS ═══════════ -->
+<section id="nonfunctional">
+  <div class="section-header">
+    <h2>5. Non-Functional Requirements</h2>
+    <div class="section-desc">Performance, security, reliability, usability, scalability, and maintainability targets.</div>
+  </div>
+
+  <h3>NFR-1: Performance</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Requirement</th><th>Target</th></tr></thead>
+      <tbody>
+        <tr><td>NFR-1.1</td><td>Page load time (initial) under average 3G connection</td><td>≤ 3 seconds</td></tr>
+        <tr><td>NFR-1.2</td><td>API response time for 95th percentile</td><td>≤ 500 ms</td></tr>
+        <tr><td>NFR-1.3</td><td>Check-in processing time (scan to confirmation)</td><td>≤ 2 seconds</td></tr>
+        <tr><td>NFR-1.4</td><td>Dashboard report generation</td><td>≤ 5 seconds</td></tr>
+        <tr><td>NFR-1.5</td><td>Concurrent user support (MVP)</td><td>50 simultaneous users</td></tr>
+        <tr><td>NFR-1.6</td><td>Search member query response (fuzzy match)</td><td>≤ 1 second</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>NFR-2: Security</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Requirement</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>NFR-2.1</td><td>All traffic over HTTPS (TLS 1.2+)</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>NFR-2.2</td><td>Passwords hashed with bcrypt (cost factor ≥ 12)</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>NFR-2.3</td><td>JWTs signed with RS256, max lifetime 24 hours</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>NFR-2.4</td><td>RBAC enforced server-side (not just UI)</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>NFR-2.5</td><td>Rate limiting on login (max 5 failed attempts per IP per 15 min)</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>NFR-2.6</td><td>All payment data changes logged in immutable audit trail</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>NFR-2.7</td><td>QR codes include cryptographic hash to prevent forgery</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>NFR-2.8</td><td>Input sanitization to prevent XSS and SQL injection</td><td><span class="badge-p0">P0</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>NFR-3: Reliability &amp; Availability</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Requirement</th><th>Target</th></tr></thead>
+      <tbody>
+        <tr><td>NFR-3.1</td><td>System uptime (excl. scheduled maintenance)</td><td>≥ 99.5%</td></tr>
+        <tr><td>NFR-3.2</td><td>Scheduled maintenance window</td><td>≤ 4 hrs/month, 48h notice</td></tr>
+        <tr><td>NFR-3.3</td><td>Automated daily database backup</td><td>Yes (retention: 30 days)</td></tr>
+        <tr><td>NFR-3.4</td><td>Recovery Point Objective (RPO)</td><td>≤ 24 hours</td></tr>
+        <tr><td>NFR-3.5</td><td>Recovery Time Objective (RTO)</td><td>≤ 4 hours</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>NFR-4: Usability</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Requirement</th><th>Target</th></tr></thead>
+      <tbody>
+        <tr><td>NFR-4.1</td><td>Mobile-first responsive design (320px – 1920px)</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>NFR-4.2</td><td>Check-in flow ≤ 3 taps/clicks from staff dashboard</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>NFR-4.3</td><td>All error messages user-friendly, actionable, bilingual</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>NFR-4.4</td><td>Support latest 2 versions of Chrome, Firefox, Safari, Edge</td><td><span class="badge-p0">P0</span></td></tr>
+        <tr><td>NFR-4.5</td><td>WCAG 2.1 AA accessibility for core flows</td><td><span class="badge-p2">P2</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>NFR-5: Scalability &amp; Maintainability</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Requirement</th><th>Target</th></tr></thead>
+      <tbody>
+        <tr><td>NFR-5.1</td><td>Horizontal scaling of application layer</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>NFR-5.2</td><td>Multi-tenant DB schema (<code>gym_id</code> column) for future multi-gym</td><td><span class="badge-p2">P2</span></td></tr>
+        <tr><td>NFR-5.3</td><td>Handle up to 10,000 member records without degradation</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>NFR-5.4</td><td>RESTful API with OpenAPI 3.0 documentation</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>NFR-5.5</td><td>Unit test coverage ≥ 80% (auth, payments, attendance)</td><td><span class="badge-p1">P1</span></td></tr>
+        <tr><td>NFR-5.6</td><td>Feature toggles for gradual rollouts</td><td><span class="badge-p2">P2</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════ 6. EDGE CASES ═══════════ -->
+<section id="edge-cases">
+  <div class="section-header">
+    <h2>6. Edge Cases &amp; Exception Handling</h2>
+    <div class="section-desc">40+ thoroughly documented edge cases across 8 categories — every scenario with expected system behavior.</div>
+  </div>
+
+  <h3>EC-1: Authentication &amp; Session <span class="badge-gold">5 edge cases</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Edge Case</th><th>Expected Behavior</th></tr></thead>
+      <tbody>
+        <tr><td>EC-1.1</td><td>Login with deactivated account</td><td>"Account deactivated. Contact your gym owner." No info leakage.</td></tr>
+        <tr><td>EC-1.2</td><td>5 failed login attempts</td><td>Lock for 15 minutes. "Too many failed attempts. Try again later."</td></tr>
+        <tr><td>EC-1.3</td><td>JWT expires mid-session</td><td>Intercept 401, redirect to login: "Session expired. Please log in again."</td></tr>
+        <tr><td>EC-1.4</td><td>Two users with same name</td><td>Show Member ID alongside name; require confirmation by ID or phone.</td></tr>
+        <tr><td>EC-1.5</td><td>Arabic name in English UI</td><td>Store in original script; display as-is regardless of UI language.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>EC-2: Subscription &amp; Payment <span class="badge-gold">8 edge cases</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Edge Case</th><th>Expected Behavior</th></tr></thead>
+      <tbody>
+        <tr><td>EC-2.1</td><td>Renew 15 days before expiry</td><td>End date = current end + plan duration (not from today)</td></tr>
+        <tr><td>EC-2.2</td><td>Renew 5 days after expiry (within grace period)</td><td>Apply from expiry date forward; charge full price</td></tr>
+        <tr><td>EC-2.3</td><td>Renew 10 days after (past grace period)</td><td>Require re-activation (reset start date). Late fee waivable by Owner</td></tr>
+        <tr><td>EC-2.4</td><td>Pay for a deactivated plan</td><td>Honor existing term; prevent new assignments only</td></tr>
+        <tr><td>EC-2.5</td><td>Duplicate payment recorded</td><td>No edit/delete. Staff creates offsetting "Credit" entry</td></tr>
+        <tr><td>EC-2.6</td><td>Free trial ends — no payment</td><td>Auto-downgrade to "Expired". Send notification on trial expiry</td></tr>
+        <tr><td>EC-2.7</td><td>Payment amount ≠ plan price</td><td>Any amount allowed; reason field mandatory when different</td></tr>
+        <tr><td>EC-2.8</td><td>Different currency attempted</td><td>System supports one gym currency (Owner-configurable). Error on mismatch</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>EC-3: Attendance <span class="badge-gold">7 edge cases</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Edge Case</th><th>Expected Behavior</th></tr></thead>
+      <tbody>
+        <tr><td>EC-3.1</td><td>QR scanned twice within 2 minutes</td><td>Silently ignored. Show: "Already checked in." No duplicate recorded</td></tr>
+        <tr><td>EC-3.2</td><td>Expired member scans (past grace period)</td><td>Rejected: "Membership expired. Please renew at the front desk."</td></tr>
+        <tr><td>EC-3.3</td><td>Check-in at 12:01 AM (cross-midnight)</td><td>00:01 belongs to new calendar day</td></tr>
+        <tr><td>EC-3.4</td><td>QR code damaged/unreadable</td><td>Staff checks in via Member ID or name search</td></tr>
+        <tr><td>EC-3.5</td><td>Attendance marking for canceled class</td><td>Marking disabled for canceled sessions</td></tr>
+        <tr><td>EC-3.6</td><td>Class runs over midnight (11 PM – 1 AM)</td><td>Session associated with class start date</td></tr>
+        <tr><td>EC-3.7</td><td>100 members check in simultaneously (rush hour)</td><td>Request queuing; no member waits &gt; 3 seconds</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>EC-4: Data Integrity <span class="badge-gold">5 edge cases</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Edge Case</th><th>Expected Behavior</th></tr></thead>
+      <tbody>
+        <tr><td>EC-4.1</td><td>Delete member with payment history</td><td>Soft delete only (is_active=false). History preserved in reports</td></tr>
+        <tr><td>EC-4.2</td><td>DST / timezone change</td><td>All timestamps in UTC. Converted to gym local timezone for display</td></tr>
+        <tr><td>EC-4.3</td><td>Simultaneous edits to same profile</td><td>Last-write-wins with optimistic locking; conflict message shown</td></tr>
+        <tr><td>EC-4.4</td><td>Network failure during payment recording</td><td>Transactional: rollback both payment and subscription update</td></tr>
+        <tr><td>EC-4.5</td><td>QR code collision</td><td>UUID-based Member ID; negligible collision probability</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>EC-5: Internationalization <span class="badge-gold">4 edge cases</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Edge Case</th><th>Expected Behavior</th></tr></thead>
+      <tbody>
+        <tr><td>EC-5.1</td><td>Arabic + English numbers mixed</td><td>Mixed-script display; Member ID always Latin</td></tr>
+        <tr><td>EC-5.2</td><td>Switch language mid-session</td><td>Immediate change without page reload (dynamic i18n)</td></tr>
+        <tr><td>EC-5.3</td><td>Hijri calendar in Arabic</td><td>Default to Gregorian; Hijri = Phase 2</td></tr>
+        <tr><td>EC-5.4</td><td>RTL layout with data tables</td><td>Reverse column order in RTL; numbers/dates stay LTR</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>EC-6: Class &amp; Trainer Scheduling <span class="badge-gold">6 edge cases</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Edge Case</th><th>Expected Behavior</th></tr></thead>
+      <tbody>
+        <tr><td>EC-6.1</td><td>Trainer double-booked at same time</td><td>Reject second assignment with conflict message</td></tr>
+        <tr><td>EC-6.2</td><td>Class at max capacity</td><td>Cannot add more members. "Class is full."</td></tr>
+        <tr><td>EC-6.3</td><td>Trainer calls in sick</td><td>Manager assigns substitute; original listed as "Substituted"</td></tr>
+        <tr><td>EC-6.4</td><td>Recurring class on public holiday</td><td>Mark specific date as "Canceled" without removing recurring schedule</td></tr>
+        <tr><td>EC-6.5</td><td>Class has 0 attendees</td><td>Trainer marks "No attendees." Flagged for Manager review</td></tr>
+        <tr><td>EC-6.6</td><td>Member attends unregistered class</td><td>Based on check-in (not pre-registration) for MVP</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>EC-7: Reporting <span class="badge-gold">5 edge cases</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Edge Case</th><th>Expected Behavior</th></tr></thead>
+      <tbody>
+        <tr><td>EC-7.1</td><td>Month with zero new members or revenue</td><td>Report shows "0" with note: "No data for this period." Flat chart</td></tr>
+        <tr><td>EC-7.2</td><td>Large date range (e.g., 5 years)</td><td>Cap at 12 months rolling; yearly summaries for larger ranges</td></tr>
+        <tr><td>EC-7.3</td><td>Export while data updating</td><td>Read-committed isolation; reflects data at export start</td></tr>
+        <tr><td>EC-7.4</td><td>Negative revenue (refund)</td><td>Display as negative in charts; separate "Refunds" line</td></tr>
+        <tr><td>EC-7.5</td><td>Multiple gyms merge</td><td>Phase 2. MVP: each gym is standalone instance</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>EC-8: System Failure <span class="badge-gold">5 edge cases</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Edge Case</th><th>Expected Behavior</th></tr></thead>
+      <tbody>
+        <tr><td>EC-8.1</td><td>Database connection lost</td><td>Global error banner. Authenticated users see cached read-only data</td></tr>
+        <tr><td>EC-8.2</td><td>Redis cache down</td><td>Fallback to DB with degraded performance. Log incident</td></tr>
+        <tr><td>EC-8.3</td><td>QR image storage unavailable</td><td>Generate QR client-side using Member ID + hash</td></tr>
+        <tr><td>EC-8.4</td><td>Browser camera unavailable for QR scan</td><td>Fallback to manual Member ID entry with hint text</td></tr>
+        <tr><td>EC-8.5</td><td>Email notification service down</td><td>Queue for retry (exponential backoff: 5min, 15min, 1hr)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════ 7. USER STORIES ═══════════ -->
+<section id="stories">
+  <div class="section-header">
+    <h2>7. User Stories (Agile Backlog)</h2>
+    <div class="section-desc">27 user stories across 8 epics, mapped to MVP sprints.</div>
+  </div>
+
+  <h3>Epic 1: Member Onboarding <span class="badge-green">Sprint 1</span></h3>
+  <div class="story"><code>US-001</code> As a Reception Staff member, I want to create a new member profile so that I can register them in the system.</div>
+  <div class="story"><code>US-002</code> As a Reception Staff member, I want to search for a member by name or ID so that I can quickly find their profile.</div>
+  <div class="story"><code>US-003</code> As a Reception Staff member, I want to edit a member's profile so that I can update their contact info or membership plan.</div>
+  <div class="story"><code>US-004</code> As a Reception Staff member, I want to deactivate a member so that I can prevent access for non-paying users.</div>
+  <div class="story"><code>US-005</code> As a Gym Owner, I want to generate QR codes for new members so that they can check in quickly using their phone.</div>
+
+  <h3>Epic 2: Subscription &amp; Payments <span class="badge-green">Sprint 1</span></h3>
+  <div class="story"><code>US-006</code> As a Gym Owner, I want to create subscription plans (monthly/quarterly/annual) so that I can offer different pricing options.</div>
+  <div class="story"><code>US-007</code> As a Reception Staff member, I want to record a membership payment so that the member's subscription is updated.</div>
+  <div class="story"><code>US-008</code> As a Reception Staff member, I want to renew a membership so that the member's access continues without interruption.</div>
+  <div class="story"><code>US-009</code> As a Gym Manager, I want to see all overdue payments so that I can follow up with members.</div>
+
+  <h3>Epic 3: Attendance &amp; Check-In <span class="badge-green">Sprint 2</span></h3>
+  <div class="story"><code>US-010</code> As a Gym Member, I want to check in by scanning my QR code so that I don't have to wait at the front desk.</div>
+  <div class="story"><code>US-011</code> As a Reception Staff member, I want to check in a member manually so that I can help members who forgot their QR code.</div>
+  <div class="story"><code>US-012</code> As a Gym Manager, I want to see today's check-in count on my dashboard so that I know how busy the gym is.</div>
+  <div class="story"><code>US-013</code> As a Gym Member, I want to view my attendance history so that I can track my gym visits.</div>
+
+  <h3>Epic 4: Trainer &amp; Classes <span class="badge-green">Sprint 2</span></h3>
+  <div class="story"><code>US-014</code> As a Gym Manager, I want to create trainer profiles so that I can assign them to classes.</div>
+  <div class="story"><code>US-015</code> As a Gym Manager, I want to create and schedule fitness classes so that members know when to attend.</div>
+  <div class="story"><code>US-016</code> As a Trainer, I want to view my weekly class schedule so that I know what sessions I'm teaching.</div>
+  <div class="story"><code>US-017</code> As a Trainer, I want to mark attendance for my class so that I can track who showed up.</div>
+
+  <h3>Epic 5: Dashboard &amp; Reports <span class="badge-green">Sprint 3</span></h3>
+  <div class="story"><code>US-018</code> As a Gym Owner, I want to see active member count, revenue, and attendance so that I can assess my gym's performance at a glance.</div>
+  <div class="story"><code>US-019</code> As a Gym Manager, I want to view monthly revenue reports so that I can understand financial trends.</div>
+  <div class="story"><code>US-020</code> As a Gym Owner, I want to export reports as PDF/CSV so that I can share them with my business partner.</div>
+
+  <h3>Epic 6: Notifications <span class="badge-green">Sprint 3</span></h3>
+  <div class="story"><code>US-021</code> As a Gym Member, I want to receive a reminder when my subscription is about to expire so that I can renew before losing access.</div>
+  <div class="story"><code>US-022</code> As a Gym Manager, I want to be notified when a VIP member's subscription is expiring so that I can personally reach out to retain them.</div>
+
+  <h3>Epic 7: Internationalization <span class="badge-green">Sprint 3</span></h3>
+  <div class="story"><code>US-023</code> As an Arabic-speaking Gym Owner, I want the system UI in Arabic (RTL) so that my staff and I can use it comfortably.</div>
+  <div class="story"><code>US-024</code> As a bilingual Reception Staff member, I want to switch between Arabic and English so that I can assist members in their preferred language.</div>
+
+  <h3>Epic 8: Security &amp; Admin <span class="badge-green">Throughout MVP</span></h3>
+  <div class="story"><code>US-025</code> As a Gym Owner, I want to manage staff accounts and roles so that I control who has access to what.</div>
+  <div class="story"><code>US-026</code> As a Gym Owner, I want to see an audit log of all staff actions so that I can monitor for suspicious activity.</div>
+  <div class="story"><code>US-027</code> As a System Administrator, I want all passwords hashed with bcrypt so that member data remains secure.</div>
+</section>
+
+<!-- ═══════════ 8. CONSTRAINTS ═══════════ -->
+<section id="constraints">
+  <div class="section-header">
+    <h2>8. Constraints &amp; Assumptions</h2>
+    <div class="section-desc">Technical constraints, business assumptions, and regulatory considerations.</div>
+  </div>
+
+  <h3>8.1 Technical Constraints</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Constraint</th><th>Rationale</th></tr></thead>
+      <tbody>
+        <tr><td>C-1</td><td>Web-only (PWA capable); no native apps for MVP</td><td>Faster development; gyms prefer browser tools on shared tablets</td></tr>
+        <tr><td>C-2</td><td>PostgreSQL as primary database</td><td>Relational integrity critical for financial transactions</td></tr>
+        <tr><td>C-3</td><td>QR codes: local generation + validation hash</td><td>No external API dependency; offline-resilient</td></tr>
+        <tr><td>C-4</td><td>No offline mode (MVP)</td><td>Internet required for check-in. Offline = Phase 2</td></tr>
+        <tr><td>C-5</td><td>Frontend: React / Vue.js preferred</td><td>Ecosystem maturity, RTL-ready libraries</td></tr>
+        <tr><td>C-6</td><td>Backend: RESTful API (not GraphQL)</td><td>Simpler caching, broader RBAC tooling</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>8.2 Business Assumptions</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Assumption</th><th>Impact if False</th></tr></thead>
+      <tbody>
+        <tr><td>A-1</td><td>Gyms have camera + internet at front desk</td><td>Fallback: manual ID entry</td></tr>
+        <tr><td>A-2</td><td>Single timezone operation (MVP)</td><td>Multi-timezone in Phase 2</td></tr>
+        <tr><td>A-3</td><td>Staff comfortable with web apps &amp; touch</td><td>Training materials needed</td></tr>
+        <tr><td>A-4</td><td>Members carry printed/digital QR code</td><td>Without it, slower staff lookup</td></tr>
+        <tr><td>A-5</td><td>Owner handles all configuration</td><td>Role expansion needed</td></tr>
+        <tr><td>A-6</td><td>No tax calculations (VAT/Sales Tax)</td><td>Phase 2 for invoice tax</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>8.3 Regulatory &amp; Compliance</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Constraint</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>R-1</td><td>GDPR-like data protection</td><td>Data minimization, right to deletion, access logs</td></tr>
+        <tr><td>R-2</td><td>Payment records retention</td><td>Default 7 years (adjustable)</td></tr>
+        <tr><td>R-3</td><td>No biometric data collection</td><td>Avoids biometric privacy regulations</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════ 9. KPIs ═══════════ -->
+<section id="kpis">
+  <div class="section-header">
+    <h2>9. Success Metrics / KPIs</h2>
+    <div class="section-desc">Measurable targets to validate product success and business impact.</div>
+  </div>
+
+  <h3>9.1 Product KPIs</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Metric</th><th>Target</th><th>Measurement</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Member Check-in Time</strong></td><td>&lt; 10 seconds</td><td>System logs check-in timestamps</td></tr>
+        <tr><td><strong>Staff Onboarding Time</strong></td><td>&lt; 30 minutes</td><td>User testing during beta</td></tr>
+        <tr><td><strong>Daily Active Staff Users</strong></td><td>&gt; 80%</td><td>Login analytics</td></tr>
+        <tr><td><strong>Subscription Renewal Rate</strong></td><td>&gt; 70% within 7 days</td><td>Payment vs. expiry data</td></tr>
+        <tr><td><strong>Error Rate</strong></td><td>&lt; 1% of check-ins</td><td>Error logs / total check-ins</td></tr>
+        <tr><td><strong>Page Load Time P95</strong></td><td>≤ 3 seconds on 3G</td><td>Real User Monitoring</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>9.2 Business KPIs</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Metric</th><th>Target</th><th>Measurement</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Member Retention (90-day)</strong></td><td>&gt; 75%</td><td>Active at day 90 / total at day 0</td></tr>
+        <tr><td><strong>Overdue Payment Recovery</strong></td><td>&gt; 60% within 15 days</td><td>Payment tracking</td></tr>
+        <tr><td><strong>Class Attendance Rate</strong></td><td>&gt; 60% capacity</td><td>Class attendance records</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════ 10. GLOSSARY ═══════════ -->
+<section id="glossary">
+  <div class="section-header">
+    <h2>10. Appendix: Glossary</h2>
+    <div class="section-desc">Key terms and definitions used throughout this document.</div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Active Member</strong></td><td>A member whose subscription end date is in the future and is not suspended/deactivated.</td></tr>
+        <tr><td><strong>Expired Member</strong></td><td>A member whose subscription end date is in the past (beyond any grace period).</td></tr>
+        <tr><td><strong>Expiring Soon</strong></td><td>A member whose subscription expires within 7 days.</td></tr>
+        <tr><td><strong>Grace Period</strong></td><td>Configurable days after expiry during which check-in is still permitted (default: 3).</td></tr>
+        <tr><td><strong>Member ID</strong></td><td>Unique system-generated identifier (e.g., <code>GDM-2026-0001</code>).</td></tr>
+        <tr><td><strong>Soft Delete</strong></td><td>Marking a record as inactive rather than physically deleting it.</td></tr>
+        <tr><td><strong>QR Code</strong></td><td>Matrix barcode encoding Member ID + cryptographic validation hash.</td></tr>
+        <tr><td><strong>RBAC</strong></td><td>Role-Based Access Control — restricting access based on user role.</td></tr>
+        <tr><td><strong>RTL</strong></td><td>Right-to-Left text direction (used for Arabic).</td></tr>
+        <tr><td><strong>LTR</strong></td><td>Left-to-Right text direction (used for English).</td></tr>
+        <tr><td><strong>P0 / P1 / P2</strong></td><td>Priority: P0 = Critical (MVP must-have), P1 = Important, P2 = Nice-to-have.</td></tr>
+        <tr><td><strong>JWT</strong></td><td>JSON Web Token — compact, URL-safe representation of claims.</td></tr>
+        <tr><td><strong>Multi-Tenant</strong></td><td>Single software instance serving multiple customers with data isolation.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</div><!-- /container -->
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<div class="doc-footer">
+  <strong>🏋️ GymDesk</strong> — Requirements Specification v1.0<br>
+  &copy; 2026 Product &amp; Engineering Team &bull; All Rights Reserved<br>
+  <span style="font-size:0.8rem; opacity:0.6;">Last updated: June 9, 2026 &bull; Confidential — Do Not Redistribute</span>
+</div>
+
+</body>
+</html>
