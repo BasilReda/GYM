@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GymDesk — Sprint Plan & Roadmap</title>
+<style>
+  :root {
+    --primary: #0f172a;
+    --secondary: #1e293b;
+    --accent: #14b8a6;
+    --accent2: #8b5cf6;
+    --gold: #f59e0b;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --card-bg: #1e293b;
+    --border: #334155;
+    --success: #22c55e;
+    --warning: #eab308;
+    --danger: #ef4444;
+    --info: #3b82f6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--primary);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(20,184,166,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(139,92,246,0.08) 0%, transparent 50%);
+    animation: pulse 8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 1; }
+  }
+  .cover-content { position: relative; z-index: 1; max-width: 900px; }
+  .cover-badge {
+    display: inline-block;
+    background: rgba(20,184,166,0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 0.4rem 1.5rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+  }
+  .cover h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    line-height: 1.1;
+  }
+  .cover .subtitle {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-bottom: 2rem;
+  }
+  .cover .tagline {
+    font-size: 1.1rem;
+    color: var(--gold);
+    font-style: italic;
+    margin-bottom: 2.5rem;
+    opacity: 0.9;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+  .cover-meta span { padding: 0.3rem 1rem; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid var(--border); }
+
+  .nav-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15,23,42,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .nav-bar .logo { font-weight: 700; color: var(--accent); font-size: 1.1rem; white-space: nowrap; }
+  .nav-bar nav { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+  .nav-bar nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.78rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .nav-bar nav a:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+
+  .toc {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+  }
+  .toc h2 { color: var(--accent); margin-bottom: 1rem; font-size: 1.3rem; }
+  .toc ol { columns: 2; column-gap: 2rem; list-style-position: inside; }
+  .toc ol li { margin-bottom: 0.4rem; break-inside: avoid; }
+  .toc ol li a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .toc ol li a:hover { color: var(--accent); }
+
+  section { margin-bottom: 3rem; }
+  .section-header {
+    border-left: 4px solid var(--accent);
+    padding-left: 1rem;
+    margin-bottom: 1.5rem;
+    padding-top: 1rem;
+  }
+  .section-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .section-header .section-desc {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-top: 0.3rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 1.5rem 0 0.8rem;
+  }
+  h4 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--gold);
+    margin: 1.2rem 0 0.6rem;
+  }
+  p { margin-bottom: 0.8rem; color: var(--text-muted); }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .card h4 { margin-top: 0; }
+
+  .table-wrap {
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  thead { background: rgba(20,184,166,0.1); }
+  th {
+    padding: 0.8rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+    white-space: nowrap;
+  }
+  td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .badge-p0 { display: inline-block; background: rgba(239,68,68,0.15); color: var(--danger); padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .badge-p1 { display: inline-block; background: rgba(234,179,8,0.15); color: var(--warning); padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .badge-p2 { display: inline-block; background: rgba(59,130,246,0.15); color: var(--info); padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .badge-green { display: inline-block; background: rgba(34,197,94,0.15); color: var(--success); padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .badge-gold { display: inline-block; background: rgba(245,158,11,0.15); color: var(--gold); padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .badge-sp { display: inline-block; background: rgba(139,92,246,0.15); color: var(--accent2); padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+
+  .sprint-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--accent);
+  }
+  .sprint-card.s0 { border-left-color: var(--info); }
+  .sprint-card.s1 { border-left-color: var(--success); }
+  .sprint-card.s2 { border-left-color: var(--gold); }
+  .sprint-card.s3 { border-left-color: var(--accent2); }
+  .sprint-card.s4 { border-left-color: var(--danger); }
+  .sprint-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .sprint-header h4 { margin: 0; color: var(--accent); font-size: 1.15rem; }
+  .sprint-header .meta { color: var(--text-muted); font-size: 0.85rem; }
+  .sprint-header .points { color: var(--gold); font-weight: 600; }
+
+  .story-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .story-item:last-child { border-bottom: none; }
+  .story-code { color: var(--accent2); font-weight: 600; font-size: 0.85rem; min-width: 70px; }
+  .story-text { flex: 1; font-size: 0.88rem; color: var(--text-muted); }
+  .story-pts { color: var(--gold); font-weight: 600; font-size: 0.85rem; min-width: 30px; text-align: right; }
+
+  .roadmap-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+  }
+  .roadmap-phase {
+    flex: 1;
+    min-width: 150px;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .roadmap-phase.phase-founder { background: rgba(59,130,246,0.1); border-color: var(--info); }
+  .roadmap-phase.phase-core { background: rgba(34,197,94,0.1); border-color: var(--success); }
+  .roadmap-phase.phase-growth { background: rgba(245,158,11,0.1); border-color: var(--gold); }
+  .roadmap-phase.phase-scale { background: rgba(139,92,246,0.1); border-color: var(--accent2); }
+  .roadmap-phase h5 { color: var(--text); font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .roadmap-phase .dates { color: var(--text-muted); font-size: 0.78rem; }
+  .roadmap-phase .desc { color: var(--text-muted); font-size: 0.82rem; margin-top: 0.3rem; }
+
+  .doc-footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 3rem;
+  }
+  .doc-footer strong { color: var(--accent); }
+
+  @media (max-width: 768px) {
+    .toc ol { columns: 1; }
+    .nav-bar nav a { font-size: 0.7rem; padding: 0.2rem 0.5rem; }
+    .cover-meta { flex-direction: column; align-items: center; gap: 0.8rem; }
+    .roadmap-bar { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ COVER ═══════════ -->
+<div class="cover">
+  <div class="cover-content">
+    <div class="cover-badge">📋 Sprint Plan &amp; Roadmap v1.0 &mdash; June 9, 2026</div>
+    <h1>🏋️ GymDesk</h1>
+    <div class="subtitle">Small Gym Management System</div>
+    <div class="tagline">&ldquo;From foundation to launch — a phased delivery plan<br>to ship a world-class gym management MVP.&rdquo;</div>
+    <div class="cover-meta">
+      <span>📅 10-Week MVP</span>
+      <span>⚡ 5 Sprints</span>
+      <span>📊 126 Story Points</span>
+      <span>👨‍💻 4-6 Person Team</span>
+      <span>🚀 Launch: Aug 2026</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ NAV BAR ═══════════ -->
+<div class="nav-bar">
+  <div class="logo">🏋️ GymDesk</div>
+  <nav>
+    <a href="#overview">Overview</a>
+    <a href="#methodology">Methodology</a>
+    <a href="#sprint0">Sprint 0</a>
+    <a href="#sprint1">Sprint 1</a>
+    <a href="#sprint2">Sprint 2</a>
+    <a href="#sprint3">Sprint 3</a>
+    <a href="#sprint4">Sprint 4</a>
+    <a href="#summary">Summary</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#team">Team</a>
+  </nav>
+</div>
+
+<div class="container">
+
+<!-- ═══════════ TOC ═══════════ -->
+<div class="toc">
+  <h2>📑 Table of Contents</h2>
+  <ol>
+    <li><a href="#overview">Planning Overview &amp; Assumptions</a></li>
+    <li><a href="#methodology">Estimation Methodology</a></li>
+    <li><a href="#sprint0">Sprint 0: Foundation &amp; Infrastructure</a></li>
+    <li><a href="#sprint1">Sprint 1: Core Operations</a></li>
+    <li><a href="#sprint2">Sprint 2: Attendance &amp; Classes</a></li>
+    <li><a href="#sprint3">Sprint 3: Dashboard, i18n &amp; Notifications</a></li>
+    <li><a href="#sprint4">Sprint 4: Security, Polish &amp; Release</a></li>
+    <li><a href="#summary">Sprint Summary &amp; Velocity</a></li>
+    <li><a href="#roadmap">Long-Range Roadmap (4 Phases)</a></li>
+    <li><a href="#team">Team Composition &amp; Roles</a></li>
+  </ol>
+</div>
+
+<!-- ═══════════ 1. OVERVIEW ═══════════ -->
+<section id="overview">
+  <div class="section-header">
+    <h2>1. Planning Overview &amp; Assumptions</h2>
+    <div class="section-desc">Scope, timeline, sizing methodology, and key planning assumptions.</div>
+  </div>
+
+  <h3>1.1 Scope of MVP</h3>
+  <p>This sprint plan covers the <strong>Minimum Viable Product (MVP)</strong> for GymDesk as defined in the SRS/PRD v1.0. The MVP includes all P0 requirements, most P1 requirements, and defers P2 items to post-launch phases.</p>
+
+  <div class="card">
+    <h4>📐 Sprint Planning Assumptions</h4>
+    <ul style="color:var(--text-muted); padding-left:1.2rem; font-size:0.9rem;">
+      <li><strong>Sprint Duration:</strong> 2 weeks per sprint (10 working days)</li>
+      <li><strong>Team Size:</strong> 5-6 people (see Section 10 for breakdown)</li>
+      <li><strong>Story Point Scale:</strong> Modified Fibonacci (1, 2, 3, 5, 8, 13, 21) — 1 SP ≈ 4 ideal hours</li>
+      <li><strong>Team Velocity:</strong> Estimated ~25–30 SP per sprint (ramping from ~20 in Sprint 0)</li>
+      <li><strong>Tech Stack:</strong> React/Vue.js frontend, RESTful API (Node.js/Python), PostgreSQL, Redis</li>
+      <li><strong>Bilingual Foundation:</strong> i18n architecture embedded from Sprint 0</li>
+      <li><strong>Testing Baseline:</strong> Unit tests required for all P0 features; ≥ 70% coverage target</li>
+      <li><strong>Definition of Done:</strong> Code reviewed, tested, documented, deployed to staging</li>
+    </ul>
+  </div>
+
+  <h3>1.2 Prioritization Mapping</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Priority</th><th>Definition</th><th>Included In</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge-p0">P0</span></td><td>Critical — System cannot function without it</td><td>Sprint 0 – Sprint 2 (must-have for MVP)</td></tr>
+        <tr><td><span class="badge-p1">P1</span></td><td>Important — Adds significant value, included where velocity allows</td><td>Sprint 2 – Sprint 4</td></tr>
+        <tr><td><span class="badge-p2">P2</span></td><td>Nice-to-have — Deferred to post-MVP</td><td>Phase 2 (Growth)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════ 2. METHODOLOGY ═══════════ -->
+<section id="methodology">
+  <div class="section-header">
+    <h2>2. Estimation Methodology</h2>
+    <div class="section-desc">How story points were assigned and what they mean.</div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Story Point</th><th>Effort (Ideal Hours)</th><th>Complexity</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1</strong></td><td>~4 hrs</td><td>Trivial — config change, simple UI tweak</td><td>Add a badge to a profile card</td></tr>
+        <tr><td><strong>2</strong></td><td>~8 hrs</td><td>Simple — one component, one API call</td><td>Password hashing setup</td></tr>
+        <tr><td><strong>3</strong></td><td>~12 hrs</td><td>Medium — standard CRUD for one entity</td><td>Edit member profile, search members</td></tr>
+        <tr><td><strong>5</strong></td><td>~20 hrs</td><td>Moderate — multi-step flow, validations</td><td>Create member + QR generation, manage staff</td></tr>
+        <tr><td><strong>8</strong></td><td>~32 hrs</td><td>Complex — multiple components, business logic</td><td>Record payment with subscription update, create &amp; schedule classes</td></tr>
+        <tr><td><strong>13</strong></td><td>~52 hrs</td><td>Very Complex — cross-cutting, risky</td><td>QR check-in engine with validation, Arabic RTL UI</td></tr>
+        <tr><td><strong>21</strong></td><td>~84 hrs</td><td>Epic — requires multiple sprints</td><td>Full dashboard with real-time analytics</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════ 3. SPRINT 0 ═══════════ -->
+<section id="sprint0">
+  <div class="section-header">
+    <h2>3. Sprint 0: Foundation &amp; Infrastructure</h2>
+    <div class="section-desc">Weeks 1–2: Setup project skeleton, CI/CD, database schema, auth system, and developer tooling.</div>
+  </div>
+
+  <div class="sprint-card s0">
+    <div class="sprint-header">
+      <h4>🔧 Sprint 0 — Foundation Layer</h4>
+      <div class="meta">Jun 9 – Jun 22, 2026 &nbsp;|&nbsp; <span class="points">22 Story Points</span></div>
+    </div>
+    <div style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">
+      <strong>Goal:</strong> Establish project foundations so all feature sprints run smoothly. No user-facing features yet.
+    </div>
+    <div style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">
+      <strong>Deliverables:</strong> Running dev environment, database schema migration, CI/CD pipeline, JWT auth skeleton, i18n framework, shared component library start, project documentation.
+    </div>
+
+    <h4 style="margin-top:1rem; font-size:0.95rem; color:var(--info);">🧱 Technical Tasks (Not User Stories)</h4>
+    <div class="story-item">
+      <span class="story-code">T-001</span>
+      <span class="story-text">Project scaffolding: monorepo setup (frontend + backend + shared), linting, formatting, commit conventions</span>
+      <span class="story-pts">3</span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">T-002</span>
+      <span class="story-text">Database schema design &amp; migration scripts (PostgreSQL): members, subscriptions, payments, attendance, trainers, classes, users, roles, audit_logs — all with <code>gym_id</code> for multi-tenancy readiness</span>
+      <span class="story-pts">5</span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">T-003</span>
+      <span class="story-text">Authentication skeleton: JWT generation/validation (RS256), bcrypt hashing, login/register API stubs, RBAC middleware</span>
+      <span class="story-pts">5</span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">T-004</span>
+      <span class="story-text">CI/CD pipeline: GitHub Actions (lint, test, build, deploy to staging), Docker Compose for local dev</span>
+      <span class="story-pts">3</span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">T-005</span>
+      <span class="story-text">i18n architecture: JSON locale files (en/ar), RTL/LTR CSS strategy, locale detection &amp; switching service</span>
+      <span class="story-pts">3</span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">T-006</span>
+      <span class="story-text">Shared UI component library start: Button, Input, Modal, Table, Badge, Card — all bilingual-compatible</span>
+      <span class="story-pts">3</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 4. SPRINT 1 ═══════════ -->
+<section id="sprint1">
+  <div class="section-header">
+    <h2>4. Sprint 1: Core Operations</h2>
+    <div class="section-desc">Weeks 3–4: Member management, subscription plans, payment recording, and the foundational data layer.</div>
+  </div>
+
+  <div class="sprint-card s1">
+    <div class="sprint-header">
+      <h4>📋 Sprint 1 — Core Operations (Epics 1, 2 + Epic 8 partial)</h4>
+      <div class="meta">Jun 23 – Jul 6, 2026 &nbsp;|&nbsp; <span class="points">39 Story Points</span></div>
+    </div>
+    <div style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">
+      <strong>Goal:</strong> Build the core data management layer — members, subscriptions, and payments must be fully CRUD-operational.
+    </div>
+    <div style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">
+      <strong>Deliverables:</strong> Member CRUD UI, subscription plan management, payment recording, QR code generation, staff account management.
+    </div>
+
+    <h4 style="margin-top:1rem; font-size:0.95rem; color:var(--success);">📌 User Stories</h4>
+
+    <div class="story-item">
+      <span class="story-code">US-001</span>
+      <span class="story-text"><strong>Create Member Profile</strong> — As Reception, I want to create a new member profile so I can register them in the system. <em style="color:var(--text-muted);">(Name, phone, email, DOB, photo, emergency contact, notes, subscription plan, start date)</em></span>
+      <span class="story-pts"><span class="badge-sp">5</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-002</span>
+      <span class="story-text"><strong>Search Members</strong> — As Reception, I want to search for a member by name, phone, ID, or plan so I can quickly find their profile. <em style="color:var(--text-muted);">(Fuzzy search ≤ 1s)</em></span>
+      <span class="story-pts"><span class="badge-sp">3</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-003</span>
+      <span class="story-text"><strong>Edit Member Profile</strong> — As Reception, I want to update a member's contact info or membership plan.</span>
+      <span class="story-pts"><span class="badge-sp">3</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-004</span>
+      <span class="story-text"><strong>Deactivate/Reactivate Member</strong> — As Reception, I want to deactivate (soft delete) a member to prevent non-paying access. Owner can hard delete.</span>
+      <span class="story-pts"><span class="badge-sp">2</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-005</span>
+      <span class="story-text"><strong>Generate QR Codes</strong> — As Owner, I want to generate scannable QR codes for new members (Member ID + validation hash) so they can check in quickly. <em style="color:var(--text-muted);">(Printable PDF card format)</em></span>
+      <span class="story-pts"><span class="badge-sp">5</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-006</span>
+      <span class="story-text"><strong>Create Subscription Plans</strong> — As Owner, I want to create/update/deactivate plans (Monthly/Quarterly/Annual) with name, duration, price, and description.</span>
+      <span class="story-pts"><span class="badge-sp">5</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-007</span>
+      <span class="story-text"><strong>Record Membership Payment</strong> — As Reception, I want to record a payment (amount, method, date, notes) and automatically update the subscription end date.</span>
+      <span class="story-pts"><span class="badge-sp">8</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-008</span>
+      <span class="story-text"><strong>Renew Membership</strong> — As Reception, I want to renew a membership so access continues without interruption. <em style="color:var(--text-muted);">(Extends from current end_date, not renewal date)</em></span>
+      <span class="story-pts"><span class="badge-sp">5</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-009</span>
+      <span class="story-text"><strong>View Overdue Payments</strong> — As Manager, I want to see all overdue payments with a "Red" indicator (&gt;30 days) so I can follow up.</span>
+      <span class="story-pts"><span class="badge-sp">3</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 5. SPRINT 2 ═══════════ -->
+<section id="sprint2">
+  <div class="section-header">
+    <h2>5. Sprint 2: Attendance &amp; Classes</h2>
+    <div class="section-desc">Weeks 5–6: QR check-in engine, attendance tracking, trainer profiles, and class scheduling.</div>
+  </div>
+
+  <div class="sprint-card s2">
+    <div class="sprint-header">
+      <h4>💪 Sprint 2 — Attendance &amp; Classes (Epics 3, 4 + remaining Epic 8)</h4>
+      <div class="meta">Jul 7 – Jul 20, 2026 &nbsp;|&nbsp; <span class="points">33 Story Points</span></div>
+    </div>
+    <div style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">
+      <strong>Goal:</strong> Members can check in (QR + manual); trainers can manage classes; attendance is tracked end-to-end.
+    </div>
+    <div style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">
+      <strong>Deliverables:</strong> QR scanner UI, check-in flow, attendance history, trainer profiles, class scheduling calendar, class attendance marking.
+    </div>
+
+    <div class="story-item">
+      <span class="story-code">US-010</span>
+      <span class="story-text"><strong>QR Code Check-In</strong> — As a Member, I want to check in by scanning my QR code so I don't wait at the front desk. <em style="color:var(--text-muted);">(Web-based scanner, ≤ 2s processing, hash validation, forgery rejection)</em></span>
+      <span class="story-pts"><span class="badge-sp">13</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-011</span>
+      <span class="story-text"><strong>Manual Check-In</strong> — As Reception, I want to check in a member manually (by searching name or entering Member ID) so I can help members who forgot their QR code.</span>
+      <span class="story-pts"><span class="badge-sp">3</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-012</span>
+      <span class="story-text"><strong>Today's Check-In Count</strong> — As Manager, I want to see today's check-in count on my dashboard so I know how busy the gym is. <em style="color:var(--text-muted);">(Near-real-time, ≤ 30s delay)</em></span>
+      <span class="story-pts"><span class="badge-sp">3</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-013</span>
+      <span class="story-text"><strong>View Attendance History</strong> — As a Member, I want to view my attendance history (filtered by date range) so I can track my gym visits.</span>
+      <span class="story-pts"><span class="badge-sp">3</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-014</span>
+      <span class="story-text"><strong>Create Trainer Profiles</strong> — As Manager, I want to create trainer profiles (name, specialization, phone, email, photo, bio).</span>
+      <span class="story-pts"><span class="badge-sp">3</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-015</span>
+      <span class="story-text"><strong>Create &amp; Schedule Fitness Classes</strong> — As Manager, I want to create class types and schedule recurring sessions on a weekly calendar (day, time, trainer, room, capacity). <em style="color:var(--text-muted);">(Double-booking prevention)</em></span>
+      <span class="story-pts"><span class="badge-sp">8</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-016</span>
+      <span class="story-text"><strong>View Weekly Schedule</strong> — As a Trainer, I want to view my weekly class schedule so I know what sessions I'm teaching.</span>
+      <span class="story-pts"><span class="badge-sp">3</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-017</span>
+      <span class="story-text"><strong>Mark Class Attendance</strong> — As a Trainer, I want to mark attendance (Present/Absent/Late) for each scheduled class session.</span>
+      <span class="story-pts"><span class="badge-sp">5</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-025</span>
+      <span class="story-text"><strong>Manage Staff Accounts</strong> — As Owner, I want to create, edit, and deactivate staff accounts (Reception, Trainer, Manager roles) so I control system access.</span>
+      <span class="story-pts"><span class="badge-sp">5</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 6. SPRINT 3 ═══════════ -->
+<section id="sprint3">
+  <div class="section-header">
+    <h2>6. Sprint 3: Dashboard, i18n &amp; Notifications</h2>
+    <div class="section-desc">Weeks 7–8: Operational dashboards, bilingual support, notification engine, and core reporting.</div>
+  </div>
+
+  <div class="sprint-card s3">
+    <div class="sprint-header">
+      <h4>📊 Sprint 3 — Dashboard, i18n &amp; Notifications (Epics 5, 6, 7)</h4>
+      <div class="meta">Jul 21 – Aug 3, 2026 &nbsp;|&nbsp; <span class="points">34 Story Points</span></div>
+    </div>
+    <div style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">
+      <strong>Goal:</strong> Management visibility, bilingual usability, and automated member communication.
+    </div>
+    <div style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">
+      <strong>Deliverables:</strong> Dashboard with KPI cards, revenue &amp; membership reports, in-app notifications, complete Arabic UI (RTL), language switching, audit log.
+    </div>
+
+    <div class="story-item">
+      <span class="story-code">US-018</span>
+      <span class="story-text"><strong>Dashboard KPIs</strong> — As Owner, I want to see Total Active Members, Expired Subscriptions, Today's Check-ins, and Monthly Revenue at a glance. <em style="color:var(--text-muted);">(4 KPI cards + membership expiry timeline for next 7 days)</em></span>
+      <span class="story-pts"><span class="badge-sp">8</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-019</span>
+      <span class="story-text"><strong>Revenue Reports</strong> — As Manager, I want to view monthly revenue with previous-month comparison so I can understand financial trends. <em style="color:var(--text-muted);">(Bar chart)</em></span>
+      <span class="story-pts"><span class="badge-sp">5</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-020</span>
+      <span class="story-text"><strong>Export Reports</strong> — As Owner, I want to export reports as CSV/PDF so I can share them externally.</span>
+      <span class="story-pts"><span class="badge-sp">5</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-021</span>
+      <span class="story-text"><strong>Membership Expiry Reminders</strong> — As a Member, I want to receive an in-app notification when my subscription is about to expire (7 days &amp; 1 day before) so I can renew on time.</span>
+      <span class="story-pts"><span class="badge-sp">5</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-022</span>
+      <span class="story-text"><strong>VIP Expiry Alerts</strong> — As Manager, I want to be notified when a high-value member's subscription is expiring so I can personally reach out to retain them.</span>
+      <span class="story-pts"><span class="badge-sp">3</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-023</span>
+      <span class="story-text"><strong>Arabic UI (RTL)</strong> — As an Arabic-speaking Owner, I want the full system UI in Arabic with RTL layout so my staff and I can use it comfortably. <em style="color:var(--text-muted);">(All screens translated, RTL tables, reversed column order)</em></span>
+      <span class="story-pts"><span class="badge-sp">8</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-024</span>
+      <span class="story-text"><strong>Language Switching</strong> — As bilingual Reception staff, I want to switch between Arabic and English instantly (no page reload) so I can assist members in their preferred language.</span>
+      <span class="story-pts"><span class="badge-sp">5</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 7. SPRINT 4 ═══════════ -->
+<section id="sprint4">
+  <div class="section-header">
+    <h2>7. Sprint 4: Security, Polish &amp; Release</h2>
+    <div class="section-desc">Weeks 9–10: Security hardening, edge cases, performance optimization, bug fixes, and production readiness.</div>
+  </div>
+
+  <div class="sprint-card s4">
+    <div class="sprint-header">
+      <h4>🔒 Sprint 4 — Security, Polish &amp; Release</h4>
+      <div class="meta">Aug 4 – Aug 17, 2026 &nbsp;|&nbsp; <span class="points">18 Story Points</span></div>
+    </div>
+    <div style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">
+      <strong>Goal:</strong> Harden the system for production — security audit, edge cases, performance testing, and bug fixes. Prepare for public launch.
+    </div>
+    <div style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">
+      <strong>Deliverables:</strong> Penetration test results, rate limiting, audit log UI, all P1 edge cases handled, staging → production deployment, launch documentation.
+    </div>
+
+    <div class="story-item">
+      <span class="story-code">US-026</span>
+      <span class="story-text"><strong>Audit Log</strong> — As Owner, I want to see an immutable audit log of all staff actions (login attempts, payment changes, profile edits) so I can monitor for suspicious activity.</span>
+      <span class="story-pts"><span class="badge-sp">5</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">US-027</span>
+      <span class="story-text"><strong>Password Security</strong> — As System Admin, I want passwords hashed with bcrypt (cost factor ≥ 12) so member data remains secure.</span>
+      <span class="story-pts"><span class="badge-sp">2</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">T-007</span>
+      <span class="story-text"><strong>Security Hardening</strong> — Rate limiting on login (5 failed / 15 min), HTTPS enforcement, input sanitization (XSS/SQLi), JWT rotation, RBAC server-side audit</span>
+      <span class="story-pts"><span class="badge-sp">5</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">T-008</span>
+      <span class="story-text"><strong>Edge Case Implementation</strong> — Code all P1 edge cases: duplicate check-in window, grace period logic, trainer double-booking, expired member rejection, DST/timezone handling, queue for rush-hour check-ins</span>
+      <span class="story-pts"><span class="badge-sp">3</span></span>
+    </div>
+    <div class="story-item">
+      <span class="story-code">T-009</span>
+      <span class="story-text"><strong>Performance &amp; Load Testing</strong> — Load test with 50 concurrent users, verify P95 response times, optimize DB queries, verify 3G page load &lt; 3s</span>
+      <span class="story-pts"><span class="badge-sp">3</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 8. SUMMARY ═══════════ -->
+<section id="summary">
+  <div class="section-header">
+    <h2>8. Sprint Summary &amp; Velocity</h2>
+    <div class="section-desc">Consolidated view of all sprints, story points, and delivery timeline.</div>
+  </div>
+
+  <h3>8.1 Story Point Summary</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Sprint</th>
+          <th>Title</th>
+          <th>Weeks</th>
+          <th>Dates</th>
+          <th>Story Points</th>
+          <th>Cumulative</th>
+          <th>User Stories</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge-p2">Sprint 0</span></td>
+          <td>Foundation &amp; Infrastructure</td>
+          <td>1–2</td>
+          <td>Jun 9 – Jun 22</td>
+          <td><strong>22</strong></td>
+          <td>22</td>
+          <td>6 Technical Tasks</td>
+        </tr>
+        <tr>
+          <td><span class="badge-green">Sprint 1</span></td>
+          <td>Core Operations</td>
+          <td>3–4</td>
+          <td>Jun 23 – Jul 6</td>
+          <td><strong>39</strong></td>
+          <td>61</td>
+          <td>US-001 to US-009</td>
+        </tr>
+        <tr>
+          <td><span class="badge-gold">Sprint 2</span></td>
+          <td>Attendance &amp; Classes</td>
+          <td>5–6</td>
+          <td>Jul 7 – Jul 20</td>
+          <td><strong>33</strong></td>
+          <td>94</td>
+          <td>US-010 to US-017, US-025</td>
+        </tr>
+        <tr>
+          <td><span class="badge-p0">Sprint 3</span></td>
+          <td>Dashboard, i18n &amp; Notifications</td>
+          <td>7–8</td>
+          <td>Jul 21 – Aug 3</td>
+          <td><strong>34</strong></td>
+          <td>128</td>
+          <td>US-018 to US-024</td>
+        </tr>
+        <tr>
+          <td><span class="badge-p1">Sprint 4</span></td>
+          <td>Security, Polish &amp; Release</td>
+          <td>9–10</td>
+          <td>Aug 4 – Aug 17</td>
+          <td><strong>18</strong></td>
+          <td>146</td>
+          <td>US-026, US-027 + 3 Tech Tasks</td>
+        </tr>
+        <tr style="background: rgba(20,184,166,0.08);">
+          <td><strong>📊 Total</strong></td>
+          <td><strong>MVP Delivery (10 weeks)</strong></td>
+          <td><strong>1–10</strong></td>
+          <td><strong>Jun 9 – Aug 17</strong></td>
+          <td><strong>146</strong></td>
+          <td><strong>146</strong></td>
+          <td><strong>27 Stories + 9 Tasks</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>8.2 Velocity Chart</h3>
+  <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:0.8rem; margin-bottom:1.5rem;">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:2rem; font-weight:800; color:var(--info);">22</div>
+      <div style="font-size:0.8rem; color:var(--text-muted);">Sprint 0</div>
+      <div style="height:8px; background:var(--info); border-radius:4px; margin-top:0.5rem;"></div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:2rem; font-weight:800; color:var(--success);">39</div>
+      <div style="font-size:0.8rem; color:var(--text-muted);">Sprint 1</div>
+      <div style="height:14px; background:var(--success); border-radius:4px; margin-top:0.5rem;"></div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:2rem; font-weight:800; color:var(--gold);">33</div>
+      <div style="font-size:0.8rem; color:var(--text-muted);">Sprint 2</div>
+      <div style="height:12px; background:var(--gold); border-radius:4px; margin-top:0.5rem;"></div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:2rem; font-weight:800; color:var(--accent2);">34</div>
+      <div style="font-size:0.8rem; color:var(--text-muted);">Sprint 3</div>
+      <div style="height:12px; background:var(--accent2); border-radius:4px; margin-top:0.5rem;"></div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:2rem; font-weight:800; color:var(--danger);">18</div>
+      <div style="font-size:0.8rem; color:var(--text-muted);">Sprint 4</div>
+      <div style="height:7px; background:var(--danger); border-radius:4px; margin-top:0.5rem;"></div>
+    </div>
+  </div>
+
+  <h3>8.3 Requirements Coverage</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Feature Area</th><th>Total Reqs</th><th>P0 Reqs</th><th>P0 Covered</th><th>P1 Covered</th><th>Deferred (P2)</th></tr></thead>
+      <tbody>
+        <tr><td>FR-1: Auth &amp; Authorization</td><td>8</td><td>4</td><td>4 (100%)</td><td>3 (FR-1.4, 1.5, 1.8)</td><td>FR-1.6</td></tr>
+        <tr><td>FR-2: Member Management</td><td>8</td><td>7</td><td>7 (100%)</td><td>—</td><td>FR-2.8</td></tr>
+        <tr><td>FR-3: Subscription Plans</td><td>9</td><td>6</td><td>6 (100%)</td><td>3 (FR-3.7, 3.8, 3.9)</td><td>—</td></tr>
+        <tr><td>FR-4: Attendance Tracking</td><td>8</td><td>5</td><td>5 (100%)</td><td>3 (FR-4.4, 4.7, 4.8)</td><td>—</td></tr>
+        <tr><td>FR-5: Payment Management</td><td>8</td><td>5</td><td>5 (100%)</td><td>—</td><td>3 (FR-5.6, 5.7, 5.8)</td></tr>
+        <tr><td>FR-6: Trainer &amp; Classes</td><td>9</td><td>6</td><td>6 (100%)</td><td>2 (FR-6.7, 6.9)</td><td>FR-6.8</td></tr>
+        <tr><td>FR-7: Dashboard &amp; Reports</td><td>7</td><td>1</td><td>1 (100%)</td><td>4 (FR-7.2, 7.3, 7.4, 7.7)</td><td>2 (FR-7.5, 7.6)</td></tr>
+        <tr><td>FR-8: Notifications</td><td>6</td><td>2</td><td>2 (100%)</td><td>3 (FR-8.3, 8.4, 8.6)</td><td>FR-8.5</td></tr>
+        <tr><td>FR-9: Internationalization</td><td>6</td><td>3</td><td>3 (100%)</td><td>3 (FR-9.4, 9.5, 9.6)</td><td>—</td></tr>
+        <tr><td>FR-10: QR Code Engine</td><td>6</td><td>5</td><td>5 (100%)</td><td>1 (FR-10.6)</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════ 9. ROADMAP ═══════════ -->
+<section id="roadmap">
+  <div class="section-header">
+    <h2>9. Long-Range Roadmap (4 Phases)</h2>
+    <div class="section-desc">From MVP to multi-location enterprise — a 12–18 month product evolution plan.</div>
+  </div>
+
+  <div class="roadmap-bar">
+    <div class="roadmap-phase phase-founder">
+      <h5>🚀 Phase 1: Founder</h5>
+      <div class="dates">Jun – Aug 2026</div>
+      <div class="desc"><strong>MVP Launch</strong><br>5 sprints · 10 weeks<br>Core features live<br>Single-gym, single-currency<br>Bilingual (EN/AR)</div>
+    </div>
+    <div class="roadmap-phase phase-core">
+      <h5>📈 Phase 2: Growth</h5>
+      <div class="dates">Sep – Dec 2026</div>
+      <div class="desc"><strong>Post-MVP Enhancements</strong><br>Online class booking (members)<br>Email/SMS notifications<br>PDF invoices &amp; receipts<br>Partial payments &amp; refunds<br>Waitlist management</div>
+    </div>
+    <div class="roadmap-phase phase-growth">
+      <h5>🏢 Phase 3: Scale</h5>
+      <div class="dates">Jan – Mar 2027</div>
+      <div class="desc"><strong>Multi-Location Ready</strong><br>Multi-gym dashboards<br>Cross-location memberships<br>Payment gateway integration<br>Native mobile apps (iOS/Android)<br>Inventory management</div>
+    </div>
+    <div class="roadmap-phase phase-scale">
+      <h5>🌐 Phase 4: Enterprise</h5>
+      <div class="dates">Apr – Jun 2027</div>
+      <div class="desc"><strong>Platform Maturity</strong><br>Marketing automation<br>Biometric integrations<br>Advanced analytics &amp; ML churn prediction<br>Hardware integrations (turnstiles)<br>White-label / franchise mode</div>
+    </div>
+  </div>
+
+  <h3>9.1 Phase 1 (MVP) — Detailed Deliverables</h3>
+  <div class="card">
+    <ul style="color:var(--text-muted); padding-left:1.2rem; font-size:0.9rem;">
+      <li>✅ Authentication &amp; RBAC for 6 roles (JWT, bcrypt, session management)</li>
+      <li>✅ Full member lifecycle (CRUD, soft delete, QR code generation)</li>
+      <li>✅ Subscription plans (Monthly/Quarterly/Annual + Free Trial + Grace Period)</li>
+      <li>✅ Payment recording with automatic subscription end-date calculation</li>
+      <li>✅ QR code check-in + manual check-in + duplicate prevention</li>
+      <li>✅ Trainer profiles &amp; class scheduling with double-booking prevention</li>
+      <li>✅ Trainer class attendance tracking (Present/Absent/Late)</li>
+      <li>✅ Operational dashboard (KPI cards, membership expiry timeline, revenue chart)</li>
+      <li>✅ In-app notifications (expiry reminders, overdue payment alerts, VIP alerts)</li>
+      <li>✅ Full Arabic (RTL) and English bilingual support with instant switching</li>
+      <li>✅ Staff account management with role assignment</li>
+      <li>✅ Audit logging for all critical operations</li>
+      <li>✅ Security: rate limiting, input sanitization, HTTPS enforcement</li>
+      <li>✅ Edge cases: duplicate check-ins, expired members, timezone handling</li>
+    </ul>
+  </div>
+
+  <h3>9.2 Phase 2 (Growth) — Sample Sprint Themes</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Month</th><th>Sprint Theme</th><th>Key Deliverables</th></tr></thead>
+      <tbody>
+        <tr><td>Sep 2026</td><td>Member Self-Service</td><td>Online class booking by members, public class schedule page, member profile portal</td></tr>
+        <tr><td>Oct 2026</td><td>Communication Channels</td><td>SMS notifications via Twilio, WhatsApp integration, email notifications (SendGrid)</td></tr>
+        <tr><td>Nov 2026</td><td>Financial Deepening</td><td>PDF invoice/receipt generation, partial payment support, refunds/credits, tax calculations</td></tr>
+        <tr><td>Dec 2026</td><td>Class &amp; Experience</td><td>Waitlist management, class capacity notifications, member feedback/ratings, check-in kiosk mode</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════ 10. TEAM ═══════════ -->
+<section id="team">
+  <div class="section-header">
+    <h2>10. Team Composition &amp; Roles</h2>
+    <div class="section-desc">Recommended team structure for the 10-week MVP delivery.</div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Role</th><th>Headcount</th><th>Focus Areas</th><th>Sprint Involvement</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>👨‍💻 Frontend Engineer</strong></td>
+          <td>2</td>
+          <td>React/Vue.js UI, i18n, RTL layout, QR scanner, responsive design</td>
+          <td>Sprint 0 – Sprint 4</td>
+        </tr>
+        <tr>
+          <td><strong>🔧 Backend Engineer</strong></td>
+          <td>2</td>
+          <td>REST API, PostgreSQL, Redis, auth, RBAC, business logic, reports</td>
+          <td>Sprint 0 – Sprint 4</td>
+        </tr>
+        <tr>
+          <td><strong>🧪 QA Engineer</strong></td>
+          <td>1</td>
+          <td>Test plans, automated tests, edge case validation, performance testing</td>
+          <td>Sprint 1 – Sprint 4 (ramps up)</td>
+        </tr>
+        <tr>
+          <td><strong>📋 Product Owner / PM</strong></td>
+          <td>1</td>
+          <td>Backlog prioritization, stakeholder management, acceptance criteria, demos</td>
+          <td>Sprint 0 – Sprint 4</td>
+        </tr>
+        <tr>
+          <td><strong>🎨 UI/UX Designer</strong></td>
+          <td>0.5</td>
+          <td>Design system, wireframes, RTL usability, user testing (shared resource)</td>
+          <td>Sprint 0 – Sprint 2</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:1rem;">
+    <h4 style="margin-top:0;">📋 Recommended Ceremonies</h4>
+    <ul style="color:var(--text-muted); padding-left:1.2rem; font-size:0.9rem;">
+      <li><strong>Sprint Planning:</strong> First Monday of each sprint (2 hours) — commit to sprint backlog</li>
+      <li><strong>Daily Standup:</strong> 15 minutes (async via Slack/Teams is acceptable)</li>
+      <li><strong>Sprint Review / Demo:</strong> Last Thursday of each sprint (1 hour) — showcase to stakeholders</li>
+      <li><strong>Sprint Retrospective:</strong> Last Friday (1 hour) — inspect &amp; adapt</li>
+      <li><strong>Backlog Refinement:</strong> Mid-sprint (1 hour) — story point estimation, break down large stories</li>
+    </ul>
+  </div>
+</section>
+
+</div><!-- /container -->
+
+<div class="doc-footer">
+  <strong>🏋️ GymDesk</strong> — Sprint Plan &amp; Roadmap v1.0<br>
+  &copy; 2026 Product &amp; Engineering Team &bull; All Rights Reserved<br>
+  <span style="font-size:0.8rem; opacity:0.6;">Derived from GymDesk SRS &amp; PRD v1.0 &bull; Last updated: June 9, 2026</span>
+</div>
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a08ecf33af851a65',t:'MTc4MDk5NDE5NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
